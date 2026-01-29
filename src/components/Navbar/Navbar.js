@@ -1,6 +1,5 @@
 import React, { useRef, useContext } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
-import { Link } from "react-router-dom";
 import About from "../About";
 import Skills from "../Skills";
 import Work from "../Work";

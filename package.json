@@ -1,6 +1,6 @@
 {
-  "homepage": "https://suseendran93.github.io/portfolio",
-  "name": "portfolio",
+  "homepage": "https://suseendran93.github.io/portfolio-builder",
+  "name": "portfolio-builder",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

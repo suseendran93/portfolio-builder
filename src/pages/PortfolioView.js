@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavbarHeader from "../components/Navbar/Navbar";
 import BackToTop from "../components/BackToTop/BackToTop";
@@ -8,12 +8,12 @@ import Skills from "../components/Skills";
 import Work from "../components/Work";
 import Contact from "../components/Contact";
 import Education from "../components/Education";
-import ThemeContext from "../context/ThemeContext";
+// import ThemeContext from "../context/ThemeContext";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { Button } from "react-bootstrap";
 
 const PortfolioView = () => {
-    const { theme } = useContext(ThemeContext);
+    // const { theme } = useContext(ThemeContext);
     const { logout } = useContext(PortfolioContext);
     const navigate = useNavigate();
 
