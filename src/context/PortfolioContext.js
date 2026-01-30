@@ -68,8 +68,6 @@ export const PortfolioProvider = ({ children }) => {
     }
   });
 
-  const [user, setUser] = useState(null); // { name: "User" } when logged in
-
   const updatePortfolioData = (section, data) => {
     setPortfolioData(prev => ({
       ...prev,
@@ -77,16 +75,9 @@ export const PortfolioProvider = ({ children }) => {
     }));
   };
 
-  const login = (username) => {
-    setUser({ name: username });
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
 
   return (
-    <PortfolioContext.Provider value={{ portfolioData, updatePortfolioData, user, login, logout }}>
+    <PortfolioContext.Provider value={{ portfolioData, updatePortfolioData }}>
       {children}
     </PortfolioContext.Provider>
   );

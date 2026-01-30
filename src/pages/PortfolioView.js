@@ -8,11 +8,12 @@ import Work from "../components/Work";
 import Contact from "../components/Contact";
 import Education from "../components/Education";
 import ThemeContext from "../context/ThemeContext";
-import { PortfolioContext } from "../context/PortfolioContext";
+// import { PortfolioContext } from "../context/PortfolioContext"; // No longer needed for auth
+import { useAuth } from "../context/AuthContext";
 import { Button } from "react-bootstrap";
 
 const PortfolioView = () => {
-    const { logout } = useContext(PortfolioContext);
+    const { logout } = useAuth();
     const { theme } = useContext(ThemeContext);
     const navigate = useNavigate();
 
@@ -50,7 +51,17 @@ const PortfolioView = () => {
             }}>
                 <Button size="sm" variant="light" onClick={() => navigate('/builder')}>Back to Builder</Button>
                 <Button size="sm" variant="success" onClick={() => alert('Generate Portfolio feature coming soon!')}>Generate Portfolio</Button>
-                <Button size="sm" variant="outline-light" onClick={() => { logout(); navigate('/'); }}>Logout</Button>
+                <Button size="sm" variant="outline-light" onClick={async () => {
+                    console.log("Preview Logout Clicked");
+                    try {
+                        await logout();
+                        console.log("Firebase Logout Successful");
+                        navigate('/');
+                    } catch (error) {
+                        console.error("Logout Error:", error);
+                        alert("Failed to log out: " + error.message);
+                    }
+                }}>Logout</Button>
             </div>
 
             <NavbarHeader

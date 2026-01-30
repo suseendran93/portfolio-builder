@@ -7,6 +7,14 @@ import Login from "./components/Login/Login";
 import Builder from "./components/Builder/Builder";
 import PortfolioView from "./pages/PortfolioView";
 
+import Signup from "./components/Signup/Signup";
+import { useAuth } from "./context/AuthContext";
+
+const PrivateRoute = ({ children }) => {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/" />;
+};
+
 const App = () => {
   const { theme } = useContext(ThemeContext);
   useEffect(() => {
@@ -22,8 +30,23 @@ const App = () => {
       <div className={`${theme ? "app-dark" : "app-light"}`}>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/builder" element={<Builder />} />
-          <Route path="/preview/*" element={<PortfolioView />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/builder"
+            element={
+              <PrivateRoute>
+                <Builder />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/preview/*"
+            element={
+              <PrivateRoute>
+                <PortfolioView />
+              </PrivateRoute>
+            }
+          />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
