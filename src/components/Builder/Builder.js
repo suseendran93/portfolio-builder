@@ -93,7 +93,9 @@ const Builder = () => {
             await setDoc(doc(db, "portfolios", currentUser.uid), cleanData);
 
             // 4. Show URL with Slug
-            const url = `${window.location.origin}/#/p/${urlSlug}`;
+            // Construct URL using current location base to support subdirectories (like GitHub Pages)
+            const baseUrl = window.location.href.split('#')[0].replace(/\/$/, "");
+            const url = `${baseUrl}/#/p/${urlSlug}`;
             setGeneratedUrl(url);
             setShowModal(true);
         } catch (error) {
