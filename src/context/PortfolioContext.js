@@ -75,6 +75,7 @@ export const PortfolioProvider = ({ children }) => {
     }));
   };
 
+
   return (
     <PortfolioContext.Provider value={{ portfolioData, updatePortfolioData }}>
       {children}
