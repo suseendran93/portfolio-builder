@@ -2,9 +2,11 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Tabs, Tab, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { PortfolioContext } from '../../context/PortfolioContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Builder = () => {
-    const { portfolioData, updatePortfolioData, user, logout } = useContext(PortfolioContext);
+    const { portfolioData, updatePortfolioData } = useContext(PortfolioContext);
+    const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('about');
 
@@ -39,9 +41,16 @@ const Builder = () => {
         }
     }, [portfolioData]); // Re-sync if context changes externally or on load
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
+    const handleLogout = async () => {
+        console.log("Handle Logout Clicked");
+        try {
+            await logout();
+            console.log("Firebase Logout Successful");
+            navigate('/');
+        } catch (error) {
+            console.error("Logout Error:", error);
+            alert('Failed to log out: ' + error.message);
+        }
     };
 
     const handlePreview = () => {
@@ -76,7 +85,7 @@ const Builder = () => {
             <div className="d-flex justify-content-between align-items-center mb-4 p-3 rounded" style={{ background: "var(--bg-card-light)", boxShadow: "0 4px 24px var(--shadow-light)", backdropFilter: "blur(15px)" }}>
                 <h1 className="m-0" style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Portfolio Builder</h1>
                 <div className="d-flex align-items-center">
-                    <span className="me-3">Welcome, {user ? user.name : 'User'}</span>
+                    <span className="me-3">Welcome, {currentUser ? currentUser.email : 'User'}</span>
                     <Button variant="primary" className="me-2" onClick={handlePreview}>View Portfolio</Button>
                     <Button variant="outline-secondary" onClick={handleLogout}>Logout</Button>
                 </div>
