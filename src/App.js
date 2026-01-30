@@ -6,9 +6,11 @@ import { PortfolioProvider } from "./context/PortfolioContext";
 import Login from "./components/Login/Login";
 import Builder from "./components/Builder/Builder";
 import PortfolioView from "./pages/PortfolioView";
-
+import PublicPortfolioView from "./pages/PublicPortfolioView";
 import Signup from "./components/Signup/Signup";
 import { useAuth } from "./context/AuthContext";
+import NotFound from "./pages/NotFound";
+
 
 const PrivateRoute = ({ children }) => {
   const { currentUser } = useAuth();
@@ -29,6 +31,9 @@ const App = () => {
     <PortfolioProvider>
       <div className={`${theme ? "app-dark" : "app-light"}`}>
         <Routes>
+          {/* Public Route FIRST to ensure priority */}
+          <Route path="/p/:userId" element={<PublicPortfolioView />} />
+
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route
@@ -48,7 +53,7 @@ const App = () => {
             }
           />
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </PortfolioProvider>
