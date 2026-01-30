@@ -1,28 +1,37 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavbarHeader from "../components/Navbar/Navbar";
 import BackToTop from "../components/BackToTop/BackToTop";
 import Hero from "../components/Hero";
-import About from "../components/About";
 import Skills from "../components/Skills";
 import Work from "../components/Work";
 import Contact from "../components/Contact";
 import Education from "../components/Education";
-// import ThemeContext from "../context/ThemeContext";
+import ThemeContext from "../context/ThemeContext";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { Button } from "react-bootstrap";
 
 const PortfolioView = () => {
-    // const { theme } = useContext(ThemeContext);
     const { logout } = useContext(PortfolioContext);
+    const { theme } = useContext(ThemeContext);
     const navigate = useNavigate();
 
-    // Ref lifting logic from original App/Navbar if needed.
-    // The original Navbar had refs defined inside it or passed down?
-    // Checking original Navbar.js... it defined refs inside itself but also accepted props?
-    // Wait, NavbarHeader inside Navbar.js defined its own refs for scrolling but App.js just rendered NavbarHeader.
-    // Actually, NavbarHeader rendered the sections (About, Skills etc) INSIDE itself in the original code?
-    // Let's re-read Navbar.js.
+    const education = useRef(null);
+    const skills = useRef(null);
+    const work = useRef(null);
+    const contact = useRef(null);
+
+    const scrollToSection = (elementRef) => {
+        const navbarHeight = 56; // Bootstrap navbar default height
+        if (elementRef && elementRef.current) {
+            const elementPosition = elementRef.current.offsetTop;
+            const offsetPosition = elementPosition - navbarHeight;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth",
+            });
+        }
+    };
 
     return (
         <>
@@ -44,25 +53,34 @@ const PortfolioView = () => {
                 <Button size="sm" variant="outline-light" onClick={() => { logout(); navigate('/'); }}>Logout</Button>
             </div>
 
-            <NavbarHeader />
+            <NavbarHeader
+                scrollToSection={scrollToSection}
+                refs={{ education, skills, work, contact }}
+            />
+
             <div id="home">
-                <Hero />
+                <Hero theme={theme} scrollToSection={scrollToSection} aboutRef={education} />
             </div>
-            <div id="about">
-                <About />
+            {/* About section removed */}
+            <div id="education" ref={education}>
+                <Education theme={theme} />
             </div>
-            <div id="education">
-                <Education />
+            <div id="work" ref={work}>
+                <Work theme={theme} />
             </div>
-            <div id="work">
-                <Work />
+            <div id="skills" ref={skills}>
+                <Skills theme={theme} />
             </div>
-            <div id="skills">
-                <Skills />
+            <div id="contact" ref={contact}>
+                <Contact theme={theme} />
             </div>
-            <div id="contact">
-                <Contact />
-            </div>
+
+            <footer className="portfolio-footer">
+                <div className="text-center p-4">
+                    &copy; {new Date().getFullYear()} Copyright: Suseendran's Portfolio
+                </div>
+            </footer>
+
             <BackToTop />
         </>
     );

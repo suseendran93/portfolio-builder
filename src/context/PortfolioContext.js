@@ -6,6 +6,9 @@ export const PortfolioContext = createContext();
 export const PortfolioProvider = ({ children }) => {
   const [portfolioData, setPortfolioData] = useState({
     about: infoData.about || "",
+    name: "Suseendran Kumar",
+    title: "Frontend Developer",
+    profilePic: null,
     work: [
       {
         company: "Hexaware Technologies Ltd.",

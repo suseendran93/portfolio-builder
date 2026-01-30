@@ -26,7 +26,7 @@ const Hero = ({ theme, scrollToSection, aboutRef }) => {
               alt="profile-img"
               width={300}
               height={300}
-              src={pic}
+              src={portfolioData.profilePic || pic}
               style={{
                 maxWidth: "100%",
                 height: "auto",
@@ -41,7 +41,7 @@ const Hero = ({ theme, scrollToSection, aboutRef }) => {
                 fontSize: "clamp(2rem, 5vw, 4rem)",
               }}
             >
-              Suseendran Kumar
+              {portfolioData.name}
             </h1>
             <h2
               className="display-6 mb-4 hero-subtitle"
@@ -49,7 +49,7 @@ const Hero = ({ theme, scrollToSection, aboutRef }) => {
                 fontSize: "clamp(1.25rem, 3vw, 2rem)",
               }}
             >
-              Frontend Developer
+              {portfolioData.title}
             </h2>
             <p
               className="lead mb-4 hero-bio"

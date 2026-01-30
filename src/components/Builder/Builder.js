@@ -10,6 +10,9 @@ const Builder = () => {
 
     // Local state for form data to allow changes without immediate commit (Save feature)
     const [localData, setLocalData] = useState({
+        name: "",
+        title: "",
+        profilePic: null,
         about: "",
         education: [],
         work: [],
@@ -23,7 +26,11 @@ const Builder = () => {
     useEffect(() => {
         if (portfolioData) {
             setLocalData({
+                name: portfolioData.name || "",
+                title: portfolioData.title || "",
+                profilePic: portfolioData.profilePic || null,
                 about: portfolioData.about || "",
+
                 education: portfolioData.education || [],
                 work: portfolioData.work || [],
                 skills: portfolioData.skills || [],
@@ -52,6 +59,18 @@ const Builder = () => {
         setHasChanges(prev => ({ ...prev, [section]: true }));
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                handleLocalChange('profilePic', reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+
     return (
         <Container fluid className="p-4" style={{ minHeight: "100vh", background: "var(--bg-primary-light)", color: "var(--text-primary-light)" }}>
             <div className="d-flex justify-content-between align-items-center mb-4 p-3 rounded" style={{ background: "var(--bg-card-light)", boxShadow: "0 4px 24px var(--shadow-light)", backdropFilter: "blur(15px)" }}>
@@ -71,9 +90,40 @@ const Builder = () => {
                         onSelect={(k) => setActiveTab(k)}
                         className="mb-3"
                     >
-                        <Tab eventKey="about" title="About">
+                        <Tab eventKey="about" title="Profile">
                             <Form.Group className="mb-3">
-                                <Form.Label>About Me</Form.Label>
+                                <Form.Label>Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={localData.name}
+                                    onChange={(e) => handleLocalChange('name', e.target.value)}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Job Title</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={localData.title}
+                                    onChange={(e) => handleLocalChange('title', e.target.value)}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Profile Picture</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                />
+                                {localData.profilePic && (
+                                    <div className="mt-2">
+                                        <img src={localData.profilePic} alt="Profile Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%' }} />
+                                    </div>
+                                )}
+                            </Form.Group>
+                            <hr />
+                            <Form.Group className="mb-3">
+                                <Form.Label>About Me / Bio</Form.Label>
+
                                 <Form.Control
                                     as="textarea"
                                     rows={6}
@@ -82,10 +132,15 @@ const Builder = () => {
                                 />
                             </Form.Group>
                             <Button
-                                variant={hasChanges.about ? "success" : "primary"}
-                                onClick={() => handleSave('about')}
+                                variant={hasChanges.name || hasChanges.title || hasChanges.profilePic || hasChanges.about ? "success" : "primary"}
+                                onClick={() => {
+                                    handleSave('name');
+                                    handleSave('title');
+                                    handleSave('profilePic');
+                                    handleSave('about');
+                                }}
                             >
-                                {hasChanges.about ? "Save Changes" : "Save"}
+                                {hasChanges.name || hasChanges.title || hasChanges.profilePic || hasChanges.about ? "Save Changes" : "Save"}
                             </Button>
                         </Tab>
 
