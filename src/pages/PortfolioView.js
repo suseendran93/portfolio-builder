@@ -12,7 +12,7 @@ import ThemeContext from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "react-bootstrap";
 
-const PortfolioView = () => {
+const PortfolioView = ({ publicMode = false }) => {
     const { logout } = useAuth();
     const { theme } = useContext(ThemeContext);
     const navigate = useNavigate();
@@ -36,33 +36,35 @@ const PortfolioView = () => {
 
     return (
         <>
-            <div style={{
-                position: 'fixed',
-                top: '80px', // Below navbar
-                right: '20px',
-                zIndex: 2000,
-                background: 'rgba(0,0,0,0.8)',
-                backdropFilter: 'blur(10px)',
-                padding: '10px 20px',
-                borderRadius: '30px',
-                display: 'flex',
-                gap: '10px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-            }}>
-                <Button size="sm" variant="light" onClick={() => navigate('/builder')}>Back to Builder</Button>
-                <Button size="sm" variant="success" onClick={() => alert('Generate Portfolio feature coming soon!')}>Generate Portfolio</Button>
-                <Button size="sm" variant="outline-light" onClick={async () => {
-                    console.log("Preview Logout Clicked");
-                    try {
-                        await logout();
-                        console.log("Firebase Logout Successful");
-                        navigate('/');
-                    } catch (error) {
-                        console.error("Logout Error:", error);
-                        alert("Failed to log out: " + error.message);
-                    }
-                }}>Logout</Button>
-            </div>
+            {!publicMode && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px', // Below navbar
+                    right: '20px',
+                    zIndex: 2000,
+                    background: 'rgba(0,0,0,0.8)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '10px 20px',
+                    borderRadius: '30px',
+                    display: 'flex',
+                    gap: '10px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}>
+                    <Button size="sm" variant="light" onClick={() => navigate('/builder')}>Back to Builder</Button>
+                    <Button size="sm" variant="success" onClick={() => alert('Generate Portfolio feature coming soon!')}>Generate Portfolio</Button>
+                    <Button size="sm" variant="outline-light" onClick={async () => {
+                        console.log("Preview Logout Clicked");
+                        try {
+                            await logout();
+                            console.log("Firebase Logout Successful");
+                            navigate('/');
+                        } catch (error) {
+                            console.error("Logout Error:", error);
+                            alert("Failed to log out: " + error.message);
+                        }
+                    }}>Logout</Button>
+                </div>
+            )}
 
             <NavbarHeader
                 scrollToSection={scrollToSection}

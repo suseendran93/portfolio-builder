@@ -17,6 +17,18 @@ export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        console.log("AuthProvider: Initializing strict checking...");
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            console.log("AuthProvider: Auth State Changed. User:", user ? user.uid : "null");
+            setCurrentUser(user);
+            setLoading(false);
+        });
+
+        return unsubscribe;
+    }, []);
+
+    // Helper functions...
     function signup(email, password) {
         return createUserWithEmailAndPassword(auth, email, password);
     }
@@ -28,16 +40,6 @@ export function AuthProvider({ children }) {
     function logout() {
         return signOut(auth);
     }
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            console.log("Auth State Changed:", user ? "User Logged In" : "User Logged Out", user?.email);
-            setCurrentUser(user);
-            setLoading(false);
-        });
-
-        return unsubscribe;
-    }, []);
 
     const value = {
         currentUser,
