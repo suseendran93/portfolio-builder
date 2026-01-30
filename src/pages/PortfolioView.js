@@ -8,7 +8,6 @@ import Work from "../components/Work";
 import Contact from "../components/Contact";
 import Education from "../components/Education";
 import ThemeContext from "../context/ThemeContext";
-// import { PortfolioContext } from "../context/PortfolioContext"; // No longer needed for auth
 import { useAuth } from "../context/AuthContext";
 import { Button } from "react-bootstrap";
 

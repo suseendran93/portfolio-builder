@@ -7,10 +7,10 @@ import Login from "./components/Login/Login";
 import Builder from "./components/Builder/Builder";
 import PortfolioView from "./pages/PortfolioView";
 import PublicPortfolioView from "./pages/PublicPortfolioView";
-
 import Signup from "./components/Signup/Signup";
 import { useAuth } from "./context/AuthContext";
 import NotFound from "./pages/NotFound";
+
 
 const PrivateRoute = ({ children }) => {
   const { currentUser } = useAuth();
