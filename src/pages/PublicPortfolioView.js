@@ -4,7 +4,6 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { db } from '../firebase';
 import { PortfolioContext } from '../context/PortfolioContext';
 import PortfolioView from './PortfolioView';
-import { Container, Spinner, Alert } from 'react-bootstrap';
 
 const PublicPortfolioView = () => {
     const { userId } = useParams();
@@ -71,17 +70,20 @@ const PublicPortfolioView = () => {
 
     if (loading) {
         return (
-            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
-                <Spinner animation="border" variant="primary" />
-            </Container>
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
-                <Alert variant="danger">{error}</Alert>
-            </Container>
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+                <div className="bg-red-50 text-red-600 p-6 rounded-lg max-w-md w-full text-center border border-red-200 shadow-md">
+                    <p className="font-semibold text-lg mb-2">Error</p>
+                    <p>{error}</p>
+                </div>
+            </div>
         );
     }
 

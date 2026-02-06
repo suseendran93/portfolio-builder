@@ -180,7 +180,7 @@ body.dark-mode .card-title {
   margin: 1em auto;
   height: auto;
   background-color: black !important;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 
@@ -389,7 +389,6 @@ body.dark-mode .theme-toggle:hover {
   width: 200%;
   height: 200%;
   background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
-  animation: rotate 20s linear infinite;
   z-index: 0;
 }
 
@@ -411,15 +410,7 @@ body.dark-mode .theme-toggle:hover {
   position: relative;
 }
 
-@keyframes rotate {
-  0% {
-    transform: rotate(0deg);
-  }
 
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 .hero-section>* {
   position: relative;
@@ -459,25 +450,6 @@ body.dark-mode .scroll-indicator:hover .scroll-chevron {
 
 .scroll-indicator:hover {
   transform: translateX(-50%) translateY(5px);
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateX(-50%) translateY(0);
-  }
-
-  40% {
-    transform: translateX(-50%) translateY(-10px);
-  }
-
-  60% {
-    transform: translateX(-50%) translateY(-5px);
-  }
 }
 
 /* Hero bio text alignment */
@@ -833,6 +805,27 @@ body.dark-mode .education-accomplishments {
   background: transparent;
 }
 
+/* Dark mode text visibility for Work and Education */
+body.dark-mode .work-item h3,
+body.dark-mode .work-item h5,
+body.dark-mode .work-item p {
+  color: var(--text-primary-dark) !important;
+  opacity: 0.95;
+}
+
+body.dark-mode .education-accomplishments h3,
+body.dark-mode .education-accomplishments h5,
+body.dark-mode .education-accomplishments p {
+  color: var(--text-primary-dark) !important;
+  opacity: 0.95;
+}
+
+body.dark-mode .work-accomplishments,
+body.dark-mode .education-accomplishments p {
+  color: var(--text-secondary-dark) !important;
+  opacity: 0.9;
+}
+
 .carousel-item {
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -900,6 +893,12 @@ body.dark-mode .education-accomplishments {
 .skill-icon-wrapper svg {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  color: var(--text-primary-light);
+}
+
+body.dark-mode .skill-icon-wrapper svg {
+  color: var(--text-primary-dark);
+  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2));
 }
 
 .skill-icon-wrapper:hover svg {
@@ -909,6 +908,18 @@ body.dark-mode .education-accomplishments {
 
 body.dark-mode .skill-icon-wrapper:hover svg {
   filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.4));
+}
+
+/* Skill Name Text Styling */
+.skill-name-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary-light);
+  text-align: center;
+}
+
+.skill-name-text-dark {
+  color: var(--text-primary-dark);
 }
 
 /* Mobile Skills Styling */
@@ -921,6 +932,10 @@ body.dark-mode .skill-icon-wrapper:hover svg {
   .skill-icon-wrapper svg {
     width: 60px !important;
     height: 60px !important;
+  }
+
+  .skill-name-text {
+    font-size: 16px;
   }
 }
 

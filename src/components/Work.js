@@ -1,85 +1,65 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { PortfolioContext } from "../context/PortfolioContext";
-import { Card, Col, Container, Row, Carousel } from "react-bootstrap";
+import { FaBuilding } from "react-icons/fa";
 
-const Work = ({ theme }) => {
+const Work = () => {
   const { portfolioData } = useContext(PortfolioContext);
-  const [index, setIndex] = useState(0);
 
-  const handleSelect = (selectedIndex, e) => {
-    setIndex(selectedIndex);
-  };
+  if (!portfolioData.work || portfolioData.work.length === 0) return null;
+
   return (
-    <Container style={{ textAlign: "center" }}>
-      <Row>
-        <Col>
-          <Card className={`card-style ${theme ? "card-style-dark" : ""}`}>
-            <Card.Body>
-              <Card.Title>Work</Card.Title>
-              <Card.Text className="m-3">
-                <Carousel
-                  className="align-items-center"
-                  variant={theme ? "light" : "dark"}
-                  activeIndex={index}
-                  onSelect={handleSelect}
-                  interval={null}
-                  indicators={false}
-                >
-                  {portfolioData.work && portfolioData.work.length > 0 ? (
-                    portfolioData.work.map((item, idx) => (
-                      <Carousel.Item key={idx}>
-                        <div className="work-item">
-                          {/* Assuming item is string for now based on JSON structure seen in info.json, 
-                                    but builder should ideally provide objects. 
-                                    However, the info.json array contained strings.
-                                    Wait, looking at info.json, work array elements were STRINGS.
-                                    But the Work.js component had hardcoded titles: "Hexaware...", "Software Engineer".
-                                 */}
-                          {/* 
-                                   Issue: The existing JSON only had descriptions. The Titles and Dates were HARDCODED in Work.js.
-                                   Detailed Refactoring needed:
-                                   I need to restructure the data model to include Company, Role, Date.
-                                   For now, I will display the string as the description.
-                                   AND I will add placeholders for Title/Company if not present in data (or migrating data structure).
-                                   
-                                   Since I initialized Context with `infoData.work` (which is array of strings),
-                                   I should treat them as just descriptions for now, OR I should update the Context initialization 
-                                   to try to capture the hardcoded data if I want to preserve it.
-                                   
-                                   Given the user wants a builder, I should support objects.
-                                   Let's assume for now the user will enter objects or strings.
-                                   If string, display as description.
-                                 */}
-                          {typeof item === 'string' ? (
-                            <>
-                              <h3>Work Experience {idx + 1}</h3>
-                              <p className="work-accomplishments">{item}</p>
-                            </>
-                          ) : (
-                            <>
-                              <h3>{item.company || "Company Name"}</h3>
-                              <h5>{item.role || "Role"}</h5>
-                              <p>{item.date || "Date"}</p>
-                              <p className="work-accomplishments">{item.description}</p>
-                            </>
-                          )}
+    <section className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-center">
+          <div className="w-full lg:w-8/12">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Work Experience</h2>
+              <div className="h-1 w-20 bg-indigo-600 mx-auto rounded-full"></div>
+            </div>
+
+            <div className="space-y-8">
+              {portfolioData.work && portfolioData.work.length > 0 ? (
+                portfolioData.work.map((item, idx) => (
+                  <div key={idx} className="relative pl-0">
+                    {/* Timeline connector for larger screens could go here, keeping it simple for now */}
+                    <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all duration-300">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                        <div className="flex items-center gap-3 mb-2 md:mb-0">
+                          <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+                            <FaBuilding size={20} />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">
+                              {typeof item === 'string' ? `Experience ${idx + 1}` : (item.company || "Company Name")}
+                            </h3>
+                            {typeof item !== 'string' && (
+                              <h4 className="text-indigo-600 font-medium">{item.role || "Role"}</h4>
+                            )}
+                          </div>
                         </div>
-                      </Carousel.Item>
-                    ))
-                  ) : (
-                    <Carousel.Item>
-                      <div className="work-item">
-                        <p>No work experience added yet.</p>
+                        {typeof item !== 'string' && (
+                          <div className="text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                            {item.date || "Date"}
+                          </div>
+                        )}
                       </div>
-                    </Carousel.Item>
-                  )}
-                </Carousel>
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+
+                      <p className="text-slate-600 leading-relaxed">
+                        {typeof item === 'string' ? item : item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-slate-500 py-10">
+                  <p>No work experience added yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 

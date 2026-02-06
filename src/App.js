@@ -1,7 +1,6 @@
 import "./App.css";
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import ThemeContext from "./context/ThemeContext";
 import { PortfolioProvider } from "./context/PortfolioContext";
 import Login from "./components/Login/Login";
 import Builder from "./components/Builder/Builder";
@@ -10,26 +9,19 @@ import PublicPortfolioView from "./pages/PublicPortfolioView";
 import Signup from "./components/Signup/Signup";
 import { useAuth } from "./context/AuthContext";
 import NotFound from "./pages/NotFound";
-
+import { Toaster } from "react-hot-toast";
 
 const PrivateRoute = ({ children }) => {
   const { currentUser } = useAuth();
   return currentUser ? children : <Navigate to="/" />;
 };
 
-const App = () => {
-  const { theme } = useContext(ThemeContext);
-  useEffect(() => {
-    if (theme) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-  }, [theme]);
 
+const App = () => {
   return (
     <PortfolioProvider>
-      <div className={`${theme ? "app-dark" : "app-light"}`}>
+      <div className="min-h-screen bg-slate-50 text-slate-900">
+        <Toaster position="top-right" />
         <Routes>
           {/* Public Route FIRST to ensure priority */}
           <Route path="/p/:userId" element={<PublicPortfolioView />} />
