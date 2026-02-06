@@ -1,5 +1,6 @@
-import React, { useContext, useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PortfolioContext } from "../context/PortfolioContext";
 import NavbarHeader from "../components/Navbar/Navbar";
 import BackToTop from "../components/BackToTop/BackToTop";
 import Hero from "../components/Hero";
@@ -7,13 +8,12 @@ import Skills from "../components/Skills";
 import Work from "../components/Work";
 import Contact from "../components/Contact";
 import Education from "../components/Education";
-import ThemeContext from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import { Button } from "react-bootstrap";
+import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 
 const PortfolioView = ({ publicMode = false }) => {
+    const { portfolioData } = useContext(PortfolioContext);
     const { logout } = useAuth();
-    const { theme } = useContext(ThemeContext);
     const navigate = useNavigate();
 
     const education = useRef(null);
@@ -22,7 +22,7 @@ const PortfolioView = ({ publicMode = false }) => {
     const contact = useRef(null);
 
     const scrollToSection = (elementRef) => {
-        const navbarHeight = 56; // Bootstrap navbar default height
+        const navbarHeight = 80;
         if (elementRef && elementRef.current) {
             const elementPosition = elementRef.current.offsetTop;
             const offsetPosition = elementPosition - navbarHeight;
@@ -34,34 +34,29 @@ const PortfolioView = ({ publicMode = false }) => {
     };
 
     return (
-        <>
+        <div className="bg-slate-50 min-h-screen text-slate-900 font-inter">
             {!publicMode && (
-                <div style={{
-                    position: 'fixed',
-                    top: '80px', // Below navbar
-                    right: '20px',
-                    zIndex: 2000,
-                    background: 'rgba(0,0,0,0.8)',
-                    backdropFilter: 'blur(10px)',
-                    padding: '10px 20px',
-                    borderRadius: '30px',
-                    display: 'flex',
-                    gap: '10px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}>
-                    <Button size="sm" variant="light" onClick={() => navigate('/builder')}>Back to Builder</Button>
-                    <Button size="sm" variant="success" onClick={() => alert('Generate Portfolio feature coming soon!')}>Generate Portfolio</Button>
-                    <Button size="sm" variant="outline-light" onClick={async () => {
-                        console.log("Preview Logout Clicked");
-                        try {
-                            await logout();
-                            console.log("Firebase Logout Successful");
-                            navigate('/');
-                        } catch (error) {
-                            console.error("Logout Error:", error);
-                            alert("Failed to log out: " + error.message);
-                        }
-                    }}>Logout</Button>
+                <div className="fixed top-24 right-5 z-50 bg-white/90 backdrop-blur-md p-3 rounded-full flex gap-2 shadow-lg border border-slate-200">
+                    <button
+                        onClick={() => navigate('/builder')}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-medium transition-colors"
+                    >
+                        <FaArrowLeft /> Back to Builder
+                    </button>
+                    <button
+                        onClick={async () => {
+                            try {
+                                await logout();
+                                navigate('/');
+                            } catch (error) {
+                                console.error("Logout Error:", error);
+                                alert("Failed to log out: " + error.message);
+                            }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-full text-sm font-medium transition-colors"
+                    >
+                        <FaSignOutAlt /> Logout
+                    </button>
                 </div>
             )}
 
@@ -71,30 +66,30 @@ const PortfolioView = ({ publicMode = false }) => {
             />
 
             <div id="home">
-                <Hero theme={theme} scrollToSection={scrollToSection} aboutRef={education} />
+                <Hero scrollToSection={scrollToSection} refs={{ education, skills, work, contact }} />
             </div>
             {/* About section removed */}
             <div id="education" ref={education}>
-                <Education theme={theme} />
+                <Education />
             </div>
             <div id="work" ref={work}>
-                <Work theme={theme} />
+                <Work />
             </div>
             <div id="skills" ref={skills}>
-                <Skills theme={theme} />
+                <Skills />
             </div>
             <div id="contact" ref={contact}>
-                <Contact theme={theme} />
+                <Contact />
             </div>
 
-            <footer className="portfolio-footer">
-                <div className="text-center p-4">
-                    &copy; {new Date().getFullYear()} Copyright: Suseendran's Portfolio
+            <footer className="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
+                <div>
+                    &copy; {new Date().getFullYear()} Copyright: {portfolioData?.name || "BuildFolio"}
                 </div>
             </footer>
 
             <BackToTop />
-        </>
+        </div>
     );
 };
 

@@ -1,81 +1,69 @@
-import React, { useContext } from "react";
-import { Container, Nav, Navbar } from "react-bootstrap";
-import ThemeContext from "../../context/ThemeContext";
-import { FaMoon, FaSun } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
 
 const NavbarHeader = ({ scrollToSection, refs }) => {
-  const { theme, toggleTheme } = useContext(ThemeContext);
   const { education, skills, work, contact } = refs || {};
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleNavClick = (ref) => {
+    setIsOpen(false);
+    if (scrollToSection && ref) scrollToSection(ref);
+  };
+
+  const navItems = [
+    { name: "Education", ref: education },
+    { name: "Work", ref: work },
+    { name: "My Skills", ref: skills },
+    { name: "Contact", ref: contact },
+  ];
 
   return (
-    <>
-      <Navbar collapseOnSelect expand="sm" fixed="top" className="custom-navbar" style={{ zIndex: 1030 }}>
-        <div className="navbar-container">
-          <Container className="navbar-left">
-            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Navbar.Collapse
-              id="responsive-navbar-nav"
-              className="navbar-collapse-custom"
-            >
-              <Nav className="header-nav">
-                <Nav.Link
-                  href="#education"
-                  eventKey="education"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (scrollToSection && education) scrollToSection(education);
-                  }}
-                >
-                  <div style={{ padding: "0 2em" }}>Education</div>
-                </Nav.Link>
-                <Nav.Link
-                  href="#skills"
-                  eventKey="skills"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (scrollToSection && skills) scrollToSection(skills);
-                  }}
-                >
-                  <div style={{ padding: "0 2em" }}>My Skills</div>
-                </Nav.Link>
+    <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm z-50 transition-all duration-300">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        {/* Brand/Logo (Optional, could add one later) */}
+        <div className="font-bold text-xl text-slate-800">
+          {/* Portfolio */}
+        </div>
 
-                <Nav.Link
-                  href="#work"
-                  eventKey="work"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (scrollToSection && work) scrollToSection(work);
-                  }}
-                >
-                  <div style={{ padding: "0 2em" }}>Work</div>
-                </Nav.Link>
-
-                <Nav.Link
-                  href="#contact"
-                  eventKey="contact"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (scrollToSection && contact) scrollToSection(contact);
-                  }}
-                >
-                  <div style={{ padding: "0 2em" }}>Contact</div>
-                </Nav.Link>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-
-          <div className="navbar-right">
+        {/* Desktop Menu */}
+        <div className="hidden sm:flex gap-8">
+          {navItems.map((item) => (
             <button
-              onClick={toggleTheme}
-              className="theme-toggle"
-              aria-label="Toggle dark mode"
+              key={item.name}
+              onClick={() => handleNavClick(item.ref)}
+              className="font-medium text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-base"
             >
-              {theme ? <FaSun size={20} /> : <FaMoon size={20} />}
+              {item.name}
             </button>
+          ))}
+        </div>
+
+        {/* Mobile Toggle */}
+        <button
+          className="sm:hidden text-slate-600 hover:text-indigo-600 focus:outline-none"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="sm:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full left-0 top-full">
+          <div className="flex flex-col p-4 gap-4">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => handleNavClick(item.ref)}
+                className="text-left font-medium text-slate-600 hover:text-indigo-600 transition-colors py-2 border-b border-slate-50 last:border-none"
+              >
+                {item.name}
+              </button>
+            ))}
           </div>
         </div>
-      </Navbar>
-    </>
+      )}
+    </nav>
   );
 };
 
