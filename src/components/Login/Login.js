@@ -35,6 +35,7 @@ const Login = () => {
             <div className="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200">
                 <div className="p-8">
                     <div className="text-center mb-8">
+                        <img src={process.env.PUBLIC_URL + "/logo.png"} alt="BuildFolio Logo" className="h-16 w-auto mx-auto mb-6" />
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                             Welcome Back
                         </h2>
