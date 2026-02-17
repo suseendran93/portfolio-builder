@@ -7,6 +7,16 @@ import { doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes } from 'react-icons/fa';
 
+// Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
+const formatDateDisplay = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr; // fallback to raw string
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+};
+
 const Builder = () => {
     const { portfolioData, updatePortfolioData } = useContext(PortfolioContext);
     const { currentUser, logout } = useAuth();
@@ -272,7 +282,7 @@ const Builder = () => {
                                     <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
                                         <h2 className="text-2xl font-bold text-slate-900">Education</h2>
                                         <button
-                                            onClick={() => handleLocalChange('education', [...localData.education, { degree: "", school: "", date: "", description: "" }])}
+                                            onClick={() => handleLocalChange('education', [...localData.education, { degree: "", school: "", startDate: "", endDate: "", description: "" }])}
                                             className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
                                         >
                                             <FaPlus /> Add New
@@ -306,13 +316,32 @@ const Builder = () => {
                                                         handleLocalChange('education', newEdu);
                                                     }}
                                                 />
-                                                <InputGroup label="Date / Period" value={edu.date || ''}
-                                                    onChange={(e) => {
-                                                        const newEdu = [...localData.education];
-                                                        newEdu[index] = { ...newEdu[index], date: e.target.value };
-                                                        handleLocalChange('education', newEdu);
-                                                    }}
-                                                />
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                        value={edu.startDate || ''}
+                                                        onChange={(e) => {
+                                                            const newEdu = [...localData.education];
+                                                            newEdu[index] = { ...newEdu[index], startDate: e.target.value, date: `${formatDateDisplay(e.target.value)} – ${formatDateDisplay(newEdu[index].endDate)}` };
+                                                            handleLocalChange('education', newEdu);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                        value={edu.endDate || ''}
+                                                        onChange={(e) => {
+                                                            const newEdu = [...localData.education];
+                                                            newEdu[index] = { ...newEdu[index], endDate: e.target.value, date: `${formatDateDisplay(newEdu[index].startDate)} – ${formatDateDisplay(e.target.value)}` };
+                                                            handleLocalChange('education', newEdu);
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                             <InputGroup label="Description" value={edu.description || ''} as="textarea" rows={2}
                                                 onChange={(e) => {
@@ -336,7 +365,7 @@ const Builder = () => {
                                     <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
                                         <h2 className="text-2xl font-bold text-slate-900">Work Experience</h2>
                                         <button
-                                            onClick={() => handleLocalChange('work', [...localData.work, { company: "", role: "", date: "", description: "" }])}
+                                            onClick={() => handleLocalChange('work', [...localData.work, { company: "", role: "", startDate: "", endDate: "", responsibilities: "", accomplishments: "" }])}
                                             className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
                                         >
                                             <FaPlus /> Add New
@@ -370,18 +399,44 @@ const Builder = () => {
                                                         handleLocalChange('work', newWork);
                                                     }}
                                                 />
-                                                <InputGroup label="Date / Period" value={wk.date || ''}
-                                                    onChange={(e) => {
-                                                        const newWork = [...localData.work];
-                                                        newWork[index] = { ...newWork[index], date: e.target.value };
-                                                        handleLocalChange('work', newWork);
-                                                    }}
-                                                />
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                        value={wk.startDate || ''}
+                                                        onChange={(e) => {
+                                                            const newWork = [...localData.work];
+                                                            newWork[index] = { ...newWork[index], startDate: e.target.value, date: `${formatDateDisplay(e.target.value)} – ${formatDateDisplay(newWork[index].endDate)}` };
+                                                            handleLocalChange('work', newWork);
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
+                                                    <input
+                                                        type="date"
+                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                        value={wk.endDate || ''}
+                                                        onChange={(e) => {
+                                                            const newWork = [...localData.work];
+                                                            newWork[index] = { ...newWork[index], endDate: e.target.value, date: `${formatDateDisplay(newWork[index].startDate)} – ${formatDateDisplay(e.target.value)}` };
+                                                            handleLocalChange('work', newWork);
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
-                                            <InputGroup label="Description" value={wk.description || ''} as="textarea" rows={2}
+                                            <InputGroup label="Roles & Responsibilities" value={wk.responsibilities || ''} as="textarea" rows={3}
                                                 onChange={(e) => {
                                                     const newWork = [...localData.work];
-                                                    newWork[index] = { ...newWork[index], description: e.target.value };
+                                                    newWork[index] = { ...newWork[index], responsibilities: e.target.value };
+                                                    handleLocalChange('work', newWork);
+                                                }}
+                                            />
+                                            <InputGroup label="Work Accomplishments" value={wk.accomplishments || ''} as="textarea" rows={3}
+                                                onChange={(e) => {
+                                                    const newWork = [...localData.work];
+                                                    newWork[index] = { ...newWork[index], accomplishments: e.target.value };
                                                     handleLocalChange('work', newWork);
                                                 }}
                                             />
