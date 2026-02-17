@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { FaChevronDown, FaUserCircle } from "react-icons/fa";
 
-const Hero = ({ scrollToSection, refs }) => {
+const Hero = ({ scrollToSection, refs, downloadResumeButton }) => {
   const { portfolioData } = useContext(PortfolioContext);
   return (
     <section
@@ -47,6 +47,7 @@ const Hero = ({ scrollToSection, refs }) => {
               >
                 View Work
               </button>
+              {downloadResumeButton}
             </div>
           </div>
 

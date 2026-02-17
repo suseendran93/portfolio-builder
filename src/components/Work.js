@@ -44,9 +44,24 @@ const Work = () => {
                         )}
                       </div>
 
-                      <p className="text-slate-600 leading-relaxed">
-                        {typeof item === 'string' ? item : item.description}
-                      </p>
+                      {typeof item !== 'string' && item.responsibilities && (
+                        <div className="mt-3">
+                          <h5 className="text-sm font-semibold text-slate-700 mb-1">Roles & Responsibilities</h5>
+                          <p className="text-slate-600 leading-relaxed whitespace-pre-line">{item.responsibilities}</p>
+                        </div>
+                      )}
+                      {typeof item !== 'string' && item.accomplishments && (
+                        <div className="mt-3">
+                          <h5 className="text-sm font-semibold text-slate-700 mb-1">Work Accomplishments</h5>
+                          <p className="text-slate-600 leading-relaxed whitespace-pre-line">{item.accomplishments}</p>
+                        </div>
+                      )}
+                      {/* Legacy fallback for old data with description */}
+                      {typeof item !== 'string' && !item.responsibilities && !item.accomplishments && item.description && (
+                        <p className="text-slate-600 leading-relaxed mt-3">
+                          {item.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))

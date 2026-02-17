@@ -8,6 +8,7 @@ import Skills from "../components/Skills";
 import Work from "../components/Work";
 import Contact from "../components/Contact";
 import Education from "../components/Education";
+import ResumeDownload from "../components/ResumeDownload/ResumeDownload";
 import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 
@@ -66,7 +67,11 @@ const PortfolioView = ({ publicMode = false }) => {
             />
 
             <div id="home">
-                <Hero scrollToSection={scrollToSection} refs={{ education, skills, work, contact }} />
+                <Hero
+                    scrollToSection={scrollToSection}
+                    refs={{ education, skills, work, contact }}
+                    downloadResumeButton={<ResumeDownload variant="secondary" showWatermark={!publicMode} />}
+                />
             </div>
             {/* About section removed */}
             <div id="education" ref={education}>
