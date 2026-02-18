@@ -13,8 +13,8 @@ import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 
 const PortfolioView = ({ publicMode = false }) => {
-    const { currentUser, userData, loading: authLoading, logout } = useAuth();
-    const { portfolioData, updatePortfolioData, loading: portfolioLoading, error } = useContext(PortfolioContext);
+    const { userData, logout } = useAuth();
+    const { portfolioData } = useContext(PortfolioContext);
     const navigate = useNavigate();
 
     const education = useRef(null);

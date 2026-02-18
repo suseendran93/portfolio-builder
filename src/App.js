@@ -7,7 +7,6 @@ import Builder from "./components/Builder/Builder";
 import PortfolioView from "./pages/PortfolioView";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
-import PublicPortfolioView from "./pages/PublicPortfolioView";
 import Signup from "./components/Signup/Signup";
 import { useAuth } from "./context/AuthContext";
 import NotFound from "./pages/NotFound";

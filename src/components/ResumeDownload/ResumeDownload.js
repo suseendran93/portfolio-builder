@@ -2,7 +2,7 @@ import React, { useRef, useContext, useState } from 'react';
 import { PortfolioContext } from '../../context/PortfolioContext';
 import { FaDownload } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import html2pdf from 'html2pdf.js';
+import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
 
 const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = false }) => {
     const { portfolioData } = useContext(PortfolioContext);
