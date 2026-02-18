@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown } from 'react-icons/fa';
 
 // Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
 const formatDateDisplay = (dateStr) => {
@@ -19,15 +19,19 @@ const formatDateDisplay = (dateStr) => {
 
 const Builder = () => {
     const { portfolioData, updatePortfolioData } = useContext(PortfolioContext);
-    const { currentUser, logout } = useAuth();
+    const { currentUser, userData, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('about');
     const [showModal, setShowModal] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [generatedUrl, setGeneratedUrl] = useState('');
     const [generating, setGenerating] = useState(false);
 
+    const isPremium = userData?.tier === 'PREMIUM';
+
     // Validation State
-    const [validationErrors, setValidationErrors] = useState([]);
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [showAllErrors, setShowAllErrors] = useState(false);
     const [isPortfolioReady, setIsPortfolioReady] = useState(false);
 
     // Local state for form data
@@ -50,20 +54,53 @@ const Builder = () => {
     }, [localData]);
 
     const validatePortfolio = (data) => {
-        const errors = [];
-        if (!data.name?.trim()) errors.push("Full Name");
-        if (!data.title?.trim()) errors.push("Job Title");
-        if (!data.about?.trim()) errors.push("About/Bio");
-        if (!data.profilePic) errors.push("Profile Picture");
-        if (!data.contact?.email?.trim()) errors.push("Email");
-        if (!data.contact?.phone?.trim()) errors.push("Phone");
+        const errors = {};
+        if (!data.name?.trim()) errors.name = "Full Name is required";
+        if (!data.title?.trim()) errors.title = "Job Title is required";
+        if (!data.about?.trim()) errors.about = "About/Bio is required";
+        if (!data.profilePic) errors.profilePic = "Profile Picture is required";
 
-        if (data.education?.length === 0) errors.push("Education (at least one)");
-        if (data.work?.length === 0) errors.push("Work Experience (at least one)");
-        if (data.skills?.length === 0) errors.push("Skills (at least one)");
+        if (!data.contact?.email?.trim()) {
+            errors.email = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(data.contact.email)) {
+            errors.email = "Invalid email format";
+        }
 
-        setValidationErrors(errors);
-        setIsPortfolioReady(errors.length === 0);
+        if (!data.contact?.phone?.trim()) errors.phone = "Phone is required";
+
+        if (!data.education || data.education.length === 0) {
+            errors.education = "At least one education entry is required";
+        } else {
+            // Validate individual entries if needed, but keeping it simple for now
+            data.education.forEach((edu, idx) => {
+                if (!edu.degree?.trim() || !edu.school?.trim()) {
+                    errors[`education_${idx}`] = "Degree and School are required";
+                }
+            });
+        }
+
+        if (!data.work || data.work.length === 0) {
+            errors.work = "At least one work experience is required";
+        } else {
+            data.work.forEach((wk, idx) => {
+                if (!wk.company?.trim() || !wk.role?.trim()) {
+                    errors[`work_${idx}`] = "Company and Role are required";
+                }
+            });
+        }
+
+        if (!data.skills || data.skills.length === 0) {
+            errors.skills = "At least one skill is required";
+        } else {
+            data.skills.forEach((skill, idx) => {
+                if (!skill.name?.trim()) {
+                    errors[`skill_${idx}`] = "Skill name is required";
+                }
+            });
+        }
+
+        setFieldErrors(errors);
+        setIsPortfolioReady(Object.keys(errors).length === 0);
     };
 
     useEffect(() => {
@@ -94,15 +131,41 @@ const Builder = () => {
 
     const handlePreview = () => {
         if (!isPortfolioReady) {
+            setShowAllErrors(true);
             toast.error("Please fill in all required fields to preview.");
             return;
         }
         navigate('/preview');
     };
 
+    const handleUpgradeToPremium = () => {
+        // Stripe integration placeholder
+        toast.loading("Redirecting to Stripe Checkout...", { id: 'upgrade-toast' });
+        setTimeout(async () => {
+            try {
+                // Simulate successful payment for now
+                await setDoc(doc(db, "users", currentUser.uid), { ...userData, tier: 'PREMIUM' }, { merge: true });
+                toast.success("Success! You are now a PREMIUM user.", { id: 'upgrade-toast' });
+                setShowUpgradeModal(false);
+                // Redirect to success page to simulate Stripe flow
+                navigate('/success');
+            } catch (err) {
+                console.error("Upgrade Error:", err);
+                toast.error("Failed to upgrade. Please try again.", { id: 'upgrade-toast' });
+            }
+        }, 2000);
+    };
+
     const handleGeneratePortfolio = async () => {
         if (!currentUser) return toast.error("Please log in to publish.");
-        if (!isPortfolioReady) return toast.error("Please fill in all required fields before publishing.");
+        if (!isPremium) {
+            setShowUpgradeModal(true);
+            return;
+        }
+        if (!isPortfolioReady) {
+            setShowAllErrors(true);
+            return toast.error("Please fill in all required fields before publishing.");
+        }
 
         setGenerating(true);
         try {
@@ -128,6 +191,15 @@ const Builder = () => {
     };
 
     const handleSave = (section) => {
+        // Run validation check
+        validatePortfolio(localData);
+
+        if (!isPortfolioReady) {
+            setShowAllErrors(true);
+            toast.error("Please fix the validation errors before saving.");
+            return;
+        }
+
         if (section === 'about') {
             updatePortfolioData('name', localData.name);
             updatePortfolioData('title', localData.title);
@@ -148,6 +220,7 @@ const Builder = () => {
 
         const sectionName = section === 'about' ? 'Profile' : section.charAt(0).toUpperCase() + section.slice(1);
         toast.success(`${sectionName} saved!`);
+        setShowAllErrors(false); // Reset error display on success
     };
 
     const handleLocalChange = (section, newData) => {
@@ -175,32 +248,38 @@ const Builder = () => {
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-slate-500 hidden md:block">
-                                {currentUser?.email}
-                            </span>
+                            <div className="flex flex-col items-end mr-2">
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                    {isPremium ? (
+                                        <span className="flex items-center gap-1 text-amber-500">
+                                            <FaCrown size={10} /> PREMIUM
+                                        </span>
+                                    ) : 'BASIC'}
+                                </span>
+                                <span className="text-xs text-slate-400 hidden md:block">
+                                    {currentUser?.email}
+                                </span>
+                            </div>
+
                             <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
 
                             <button
                                 onClick={handleGeneratePortfolio}
-                                disabled={generating || !isPortfolioReady}
-                                className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium ${generating || !isPortfolioReady
+                                disabled={generating || (!isPremium && false)} // Button is enabled for Basic but triggers modal
+                                className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium ${generating
                                     ? 'bg-slate-300 cursor-not-allowed'
                                     : 'bg-emerald-600 hover:bg-emerald-700'
                                     }`}
-                                title={!isPortfolioReady ? `Missing: ${validationErrors.join(', ')}` : "Publish to live URL"}
+                                title={!isPortfolioReady ? "Please complete all required fields" : "Publish to live URL"}
                             >
                                 <FaMagic className={generating ? "animate-spin" : ""} />
-                                {generating ? 'Building...' : 'Publish'}
+                                {generating ? 'Building...' : (isPremium ? 'Publish' : 'Unlock Publish')}
                             </button>
 
                             <button
                                 onClick={handlePreview}
-                                disabled={!isPortfolioReady}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${!isPortfolioReady
-                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                    : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
-                                    }`}
-                                title={!isPortfolioReady ? "Complete required fields to preview" : "Preview Portfolio"}
+                                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                                title="Preview Portfolio"
                             >
                                 <FaEye /> <span className="hidden sm:inline">Preview</span>
                             </button>
@@ -241,34 +320,57 @@ const Builder = () => {
                             {activeTab === 'about' && (
                                 <div className="space-y-6">
                                     <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Profile Details</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <InputGroup label="Full Name" value={localData.name} onChange={(e) => handleLocalChange('name', e.target.value)} />
-                                        <InputGroup label="Job Title" value={localData.title} onChange={(e) => handleLocalChange('title', e.target.value)} />
-                                    </div>
+                                    <div className="flex-1 space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <InputGroup
+                                                label="Full Name"
+                                                value={localData.name}
+                                                onChange={(e) => handleLocalChange('name', e.target.value)}
+                                                error={showAllErrors ? fieldErrors.name : null}
+                                            />
+                                            <InputGroup
+                                                label="Job Title"
+                                                value={localData.title}
+                                                onChange={(e) => handleLocalChange('title', e.target.value)}
+                                                error={showAllErrors ? fieldErrors.title : null}
+                                            />
+                                        </div>
 
-                                    <div className="mb-6">
-                                        <label className="block text-sm font-semibold text-slate-700 mb-2">Profile Picture</label>
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden shrink-0">
-                                                {localData.profilePic ? (
-                                                    <img src={localData.profilePic} alt="Profile" className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <FaImage className="text-slate-400 text-2xl" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleImageUpload}
-                                                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                                />
-                                                <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
+                                        <div className="mb-6">
+                                            <label className={`block text-sm font-semibold mb-2 ${showAllErrors && fieldErrors.profilePic ? 'text-red-600' : 'text-slate-700'}`}>Profile Picture</label>
+                                            <div className="flex items-center gap-6">
+                                                <div className={`w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0
+                                                    ${showAllErrors && fieldErrors.profilePic ? 'border-red-300' : 'border-slate-300'}`}>
+                                                    {localData.profilePic ? (
+                                                        <img src={localData.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <FaImage className="text-slate-400 text-2xl" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleImageUpload}
+                                                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                                    />
+                                                    <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
+                                                    {showAllErrors && fieldErrors.profilePic && (
+                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.profilePic}</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <InputGroup label="Bio / About Me" value={localData.about} onChange={(e) => handleLocalChange('about', e.target.value)} as="textarea" rows={6} />
+                                        <InputGroup
+                                            label="Bio / About Me"
+                                            value={localData.about}
+                                            onChange={(e) => handleLocalChange('about', e.target.value)}
+                                            as="textarea"
+                                            rows={6}
+                                            error={showAllErrors ? fieldErrors.about : null}
+                                        />
+                                    </div>
 
                                     <div className="pt-4 border-t border-slate-100">
                                         <SaveButton onSave={() => handleSave('about')} hasChange={hasChanges.name || hasChanges.title || hasChanges.profilePic || hasChanges.about} />
@@ -280,7 +382,12 @@ const Builder = () => {
                             {activeTab === 'education' && (
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                        <h2 className="text-2xl font-bold text-slate-900">Education</h2>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-900">Education</h2>
+                                            {showAllErrors && fieldErrors.education && (
+                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.education}</p>
+                                            )}
+                                        </div>
                                         <button
                                             onClick={() => handleLocalChange('education', [...localData.education, { degree: "", school: "", startDate: "", endDate: "", description: "" }])}
                                             className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
@@ -302,19 +409,25 @@ const Builder = () => {
                                             </button>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                <InputGroup label="Degree" value={edu.degree || ''}
+                                                <InputGroup
+                                                    label="Degree"
+                                                    value={edu.degree || ''}
                                                     onChange={(e) => {
                                                         const newEdu = [...localData.education];
                                                         newEdu[index] = { ...newEdu[index], degree: e.target.value };
                                                         handleLocalChange('education', newEdu);
                                                     }}
+                                                    error={showAllErrors ? (edu.degree ? null : "Required") : null}
                                                 />
-                                                <InputGroup label="School / University" value={edu.school || ''}
+                                                <InputGroup
+                                                    label="School / University"
+                                                    value={edu.school || ''}
                                                     onChange={(e) => {
                                                         const newEdu = [...localData.education];
                                                         newEdu[index] = { ...newEdu[index], school: e.target.value };
                                                         handleLocalChange('education', newEdu);
                                                     }}
+                                                    error={showAllErrors ? (edu.school ? null : "Required") : null}
                                                 />
                                                 <div>
                                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
@@ -363,7 +476,12 @@ const Builder = () => {
                             {activeTab === 'work' && (
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                        <h2 className="text-2xl font-bold text-slate-900">Work Experience</h2>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-900">Work Experience</h2>
+                                            {showAllErrors && fieldErrors.work && (
+                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.work}</p>
+                                            )}
+                                        </div>
                                         <button
                                             onClick={() => handleLocalChange('work', [...localData.work, { company: "", role: "", startDate: "", endDate: "", responsibilities: "", accomplishments: "" }])}
                                             className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
@@ -385,19 +503,25 @@ const Builder = () => {
                                             </button>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                <InputGroup label="Company" value={wk.company || ''}
+                                                <InputGroup
+                                                    label="Company"
+                                                    value={wk.company || ''}
                                                     onChange={(e) => {
                                                         const newWork = [...localData.work];
                                                         newWork[index] = { ...newWork[index], company: e.target.value };
                                                         handleLocalChange('work', newWork);
                                                     }}
+                                                    error={showAllErrors ? (wk.company ? null : "Required") : null}
                                                 />
-                                                <InputGroup label="Role / Position" value={wk.role || ''}
+                                                <InputGroup
+                                                    label="Role / Position"
+                                                    value={wk.role || ''}
                                                     onChange={(e) => {
                                                         const newWork = [...localData.work];
                                                         newWork[index] = { ...newWork[index], role: e.target.value };
                                                         handleLocalChange('work', newWork);
                                                     }}
+                                                    error={showAllErrors ? (wk.role ? null : "Required") : null}
                                                 />
                                                 <div>
                                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
@@ -453,7 +577,12 @@ const Builder = () => {
                             {activeTab === 'skills' && (
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                        <h2 className="text-2xl font-bold text-slate-900">Skills</h2>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-900">Skills</h2>
+                                            {showAllErrors && fieldErrors.skills && (
+                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.skills}</p>
+                                            )}
+                                        </div>
                                         <button
                                             onClick={() => handleLocalChange('skills', [...localData.skills, { name: "New Skill", percent: 50 }])}
                                             className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
@@ -480,7 +609,8 @@ const Builder = () => {
                                                         <label className="text-xs font-semibold text-slate-500 uppercase">Skill Name</label>
                                                         <input
                                                             type="text"
-                                                            className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm mt-1 focus:ring-1 focus:ring-indigo-500 outline-none"
+                                                            className={`w-full bg-white border rounded px-2 py-1 text-sm mt-1 focus:ring-1 focus:ring-indigo-500 outline-none
+                                                                ${showAllErrors && !skill.name?.trim() ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300'}`}
                                                             value={skill.name || ''}
                                                             onChange={(e) => {
                                                                 const newSkills = [...localData.skills];
@@ -488,6 +618,9 @@ const Builder = () => {
                                                                 handleLocalChange('skills', newSkills);
                                                             }}
                                                         />
+                                                        {showAllErrors && !skill.name?.trim() && (
+                                                            <p className="text-red-500 text-[10px] mt-0.5">Required</p>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <label className="text-xs font-semibold text-slate-500 uppercase flex justify-between">
@@ -523,8 +656,19 @@ const Builder = () => {
                                     <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Contact Information</h2>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <InputGroup label="Phone Number" value={localData.contact.phone || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, phone: e.target.value })} />
-                                        <InputGroup label="Email Address" type="email" value={localData.contact.email || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, email: e.target.value })} />
+                                        <InputGroup
+                                            label="Phone Number"
+                                            value={localData.contact.phone || ''}
+                                            onChange={(e) => handleLocalChange('contact', { ...localData.contact, phone: e.target.value })}
+                                            error={showAllErrors ? fieldErrors.phone : null}
+                                        />
+                                        <InputGroup
+                                            label="Email Address"
+                                            type="email"
+                                            value={localData.contact.email || ''}
+                                            onChange={(e) => handleLocalChange('contact', { ...localData.contact, email: e.target.value })}
+                                            error={showAllErrors ? fieldErrors.email : null}
+                                        />
                                         <InputGroup label="LinkedIn URL" value={localData.contact.linkedin || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, linkedin: e.target.value })} />
                                         <InputGroup label="GitHub URL" value={localData.contact.github || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })} />
                                     </div>
@@ -583,18 +727,70 @@ const Builder = () => {
                     </div>
                 )
             }
+
+            {/* Upgrade to Premium Modal */}
+            {showUpgradeModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-0 overflow-hidden transform transition-all scale-100">
+                        <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-6 text-white text-center relative">
+                            <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
+                                <FaTimes />
+                            </button>
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 mb-4">
+                                <FaCrown size={32} />
+                            </div>
+                            <h3 className="text-2xl font-bold">Upgrade to Premium</h3>
+                            <p className="text-white/80 mt-1">Unlock the full power of BuildFolio</p>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
+                                    <p className="text-sm font-medium text-slate-700">Publish your portfolio to a live link</p>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
+                                    <p className="text-sm font-medium text-slate-700">Remove 'DRAFT' watermark from resumes</p>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
+                                    <p className="text-sm font-medium text-slate-700">Custom subdomains (coming soon)</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                                <span className="text-4xl font-bold text-slate-900">$9</span>
+                                <span className="text-slate-500 ml-1 font-medium">one-time</span>
+                            </div>
+
+                            <button
+                                onClick={handleUpgradeToPremium}
+                                className="w-full py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl font-bold hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                            >
+                                Upgrade Now
+                            </button>
+
+                            <p className="text-center text-xs text-slate-400">
+                                🔒 Secure payment via Stripe
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };
 
 // UI Components Helpers
-const InputGroup = ({ label, value, onChange, type = "text", placeholder = "", as = "input", rows }) => (
+const InputGroup = ({ label, value, onChange, type = "text", placeholder = "", as = "input", rows, error }) => (
     <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
+        <label className={`block text-sm font-semibold mb-2 ${error ? 'text-red-600' : 'text-slate-700'}`}>{label}</label>
         {as === "textarea" ? (
             <textarea
                 rows={rows || 4}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-slate-900 bg-white
+                    ${error ? 'border-red-500 focus:ring-red-200' : 'border-slate-300 focus:ring-indigo-500'}`}
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
@@ -602,12 +798,17 @@ const InputGroup = ({ label, value, onChange, type = "text", placeholder = "", a
         ) : (
             <input
                 type={type}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-slate-900 bg-white
+                    ${error ? 'border-red-500 focus:ring-red-200' : 'border-slate-300 focus:ring-indigo-500'}`}
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
             />
         )}
+        {error && <p className="text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-red-500"></span>
+            {error}
+        </p>}
     </div>
 );
 

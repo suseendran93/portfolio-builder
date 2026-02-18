@@ -6,6 +6,8 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore"; // Import directly
+import { db } from "../firebase"; // Import db directly
 
 const AuthContext = createContext();
 
@@ -15,17 +17,47 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
+    const [userData, setUserData] = useState({ tier: 'BASIC' });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log("AuthProvider: Initializing strict checking...");
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            console.log("AuthProvider: Auth State Changed. User:", user ? user.uid : "null");
+        let userDocUnsubscribe = null;
+
+        const authUnsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
+
+            // Cleanup previous document listener if it exists
+            if (userDocUnsubscribe) {
+                userDocUnsubscribe();
+                userDocUnsubscribe = null;
+            }
+
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+
+                // Set up real-time listener for user data
+                userDocUnsubscribe = onSnapshot(userRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        setUserData(snapshot.data());
+                    } else {
+                        // If no doc exists, create it
+                        const initialData = { tier: 'BASIC', email: user.email };
+                        setDoc(userRef, initialData);
+                        setUserData(initialData);
+                    }
+                }, (error) => {
+                    console.error("Error listening to user data:", error);
+                });
+            } else {
+                setUserData({ tier: 'BASIC' });
+            }
             setLoading(false);
         });
 
-        return unsubscribe;
+        return () => {
+            authUnsubscribe();
+            if (userDocUnsubscribe) userDocUnsubscribe();
+        };
     }, []);
 
     // Helper functions...
@@ -43,6 +75,7 @@ export function AuthProvider({ children }) {
 
     const value = {
         currentUser,
+        userData, // Expose tier data
         login,
         signup,
         logout
