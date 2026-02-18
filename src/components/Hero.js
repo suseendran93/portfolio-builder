@@ -6,7 +6,7 @@ const Hero = ({ scrollToSection, refs, downloadResumeButton }) => {
   const { portfolioData } = useContext(PortfolioContext);
   return (
     <section
-      className="hero-section relative flex items-center justify-center min-h-screen bg-slate-50 overflow-hidden"
+      className="hero-section relative flex flex-col min-h-screen bg-slate-50 overflow-hidden pt-32 pb-20"
     >
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-30">
@@ -14,8 +14,8 @@ const Hero = ({ scrollToSection, refs, downloadResumeButton }) => {
         <div className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-gradient-to-l from-blue-100 to-indigo-50 blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-12">
+      <div className="container mx-auto px-4 relative z-10 flex-1 flex items-center">
+        <div className="w-full flex flex-col-reverse md:flex-row items-center justify-between gap-12">
 
           {/* Text Content - Now on Left */}
           <div className="w-full md:w-1/2 text-center md:text-left space-y-6">

@@ -46,7 +46,6 @@ const Builder = () => {
         contact: { phone: "", email: "", linkedin: "", github: "" }
     });
 
-    const [hasChanges, setHasChanges] = useState({});
 
     // Check validation whenever data changes
     useEffect(() => {
@@ -156,6 +155,29 @@ const Builder = () => {
         }, 2000);
     };
 
+    const saveToFirestore = async (dataToSave = portfolioData) => {
+        if (!currentUser) throw new Error("Please log in to save.");
+
+        try {
+            const cleanData = JSON.parse(JSON.stringify(dataToSave));
+            let urlSlug = cleanData.customSlug;
+
+            if (!urlSlug) {
+                const namePart = (cleanData.name || "user").toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                const randomPart = Math.floor(1000 + Math.random() * 9000);
+                urlSlug = `${namePart}-${randomPart}`;
+                cleanData.customSlug = urlSlug;
+                updatePortfolioData('customSlug', urlSlug);
+            }
+
+            await setDoc(doc(db, "portfolios", currentUser.uid), cleanData);
+            return urlSlug;
+        } catch (error) {
+            console.error("Error saving to Firestore:", error);
+            throw error;
+        }
+    };
+
     const handleGeneratePortfolio = async () => {
         if (!currentUser) return toast.error("Please log in to publish.");
         if (!isPremium) {
@@ -169,16 +191,7 @@ const Builder = () => {
 
         setGenerating(true);
         try {
-            const cleanData = JSON.parse(JSON.stringify(portfolioData));
-            let urlSlug = cleanData.customSlug;
-            if (!urlSlug) {
-                const namePart = (cleanData.name || "user").toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                const randomPart = Math.floor(1000 + Math.random() * 9000);
-                urlSlug = `${namePart}-${randomPart}`;
-                cleanData.customSlug = urlSlug;
-                updatePortfolioData('customSlug', urlSlug);
-            }
-            await setDoc(doc(db, "portfolios", currentUser.uid), cleanData);
+            const urlSlug = await saveToFirestore();
             const baseUrl = window.location.href.split('#')[0].replace(/\/$/, "");
             setGeneratedUrl(`${baseUrl}/#/p/${urlSlug}`);
             setShowModal(true);
@@ -190,7 +203,7 @@ const Builder = () => {
         }
     };
 
-    const handleSave = (section) => {
+    const handleSaveAll = async () => {
         // Run validation check
         validatePortfolio(localData);
 
@@ -200,32 +213,26 @@ const Builder = () => {
             return;
         }
 
-        if (section === 'about') {
-            updatePortfolioData('name', localData.name);
-            updatePortfolioData('title', localData.title);
-            updatePortfolioData('profilePic', localData.profilePic);
-            updatePortfolioData('about', localData.about);
+        // Sync all local sections to PortfolioContext
+        Object.entries(localData).forEach(([key, value]) => {
+            updatePortfolioData(key, value);
+        });
 
-            setHasChanges(prev => ({
-                ...prev,
-                name: false,
-                title: false,
-                profilePic: false,
-                about: false
-            }));
-        } else {
-            updatePortfolioData(section, localData[section]);
-            setHasChanges(prev => ({ ...prev, [section]: false }));
+        try {
+            // Sync entire state to Firestore
+            await saveToFirestore(localData);
+            toast.success("Changes saved.");
+
+        } catch (error) {
+            console.error("Auto-sync error:", error);
+            toast.error("Saved locally, but failed to sync to database.");
         }
 
-        const sectionName = section === 'about' ? 'Profile' : section.charAt(0).toUpperCase() + section.slice(1);
-        toast.success(`${sectionName} saved!`);
         setShowAllErrors(false); // Reset error display on success
     };
 
     const handleLocalChange = (section, newData) => {
         setLocalData(prev => ({ ...prev, [section]: newData }));
-        setHasChanges(prev => ({ ...prev, [section]: true }));
     };
 
     const handleImageUpload = (e) => {
@@ -274,6 +281,19 @@ const Builder = () => {
                             >
                                 <FaMagic className={generating ? "animate-spin" : ""} />
                                 {generating ? 'Building...' : (isPremium ? 'Publish' : 'Unlock Publish')}
+                            </button>
+
+                            <button
+                                onClick={handleSaveAll}
+                                disabled={generating}
+                                className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium ${generating
+                                    ? 'bg-slate-300 cursor-not-allowed'
+                                    : 'bg-indigo-600 hover:bg-indigo-700'
+                                    }`}
+                                title="Save all changes to database"
+                            >
+                                <FaCheck />
+                                {generating ? 'Saving...' : 'Save Changes'}
                             </button>
 
                             <button
@@ -348,13 +368,27 @@ const Builder = () => {
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={handleImageUpload}
-                                                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                                    />
-                                                    <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
+                                                    {localData.profilePic ? (
+                                                        <div className="flex flex-col gap-2">
+                                                            <button
+                                                                onClick={() => handleLocalChange('profilePic', null)}
+                                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-semibold hover:bg-red-100 transition-colors border border-red-100 w-fit"
+                                                            >
+                                                                <FaTrash size={12} />
+                                                            </button>
+
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={handleImageUpload}
+                                                                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                                            />
+                                                            <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
+                                                        </>
+                                                    )}
                                                     {showAllErrors && fieldErrors.profilePic && (
                                                         <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.profilePic}</p>
                                                     )}
@@ -370,10 +404,6 @@ const Builder = () => {
                                             rows={6}
                                             error={showAllErrors ? fieldErrors.about : null}
                                         />
-                                    </div>
-
-                                    <div className="pt-4 border-t border-slate-100">
-                                        <SaveButton onSave={() => handleSave('about')} hasChange={hasChanges.name || hasChanges.title || hasChanges.profilePic || hasChanges.about} />
                                     </div>
                                 </div>
                             )}
@@ -465,10 +495,6 @@ const Builder = () => {
                                             />
                                         </div>
                                     ))}
-
-                                    <div className="pt-4 border-t border-slate-100">
-                                        <SaveButton onSave={() => handleSave('education')} hasChange={hasChanges.education} />
-                                    </div>
                                 </div>
                             )}
 
@@ -566,10 +592,6 @@ const Builder = () => {
                                             />
                                         </div>
                                     ))}
-
-                                    <div className="pt-4 border-t border-slate-100">
-                                        <SaveButton onSave={() => handleSave('work')} hasChange={hasChanges.work} />
-                                    </div>
                                 </div>
                             )}
 
@@ -643,10 +665,6 @@ const Builder = () => {
                                             </div>
                                         ))}
                                     </div>
-
-                                    <div className="pt-4 border-t border-slate-100">
-                                        <SaveButton onSave={() => handleSave('skills')} hasChange={hasChanges.skills} />
-                                    </div>
                                 </div>
                             )}
 
@@ -671,10 +689,6 @@ const Builder = () => {
                                         />
                                         <InputGroup label="LinkedIn URL" value={localData.contact.linkedin || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, linkedin: e.target.value })} />
                                         <InputGroup label="GitHub URL" value={localData.contact.github || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })} />
-                                    </div>
-
-                                    <div className="pt-4 border-t border-slate-100">
-                                        <SaveButton onSave={() => handleSave('contact')} hasChange={hasChanges.contact} />
                                     </div>
                                 </div>
                             )}
@@ -729,55 +743,57 @@ const Builder = () => {
             }
 
             {/* Upgrade to Premium Modal */}
-            {showUpgradeModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-0 overflow-hidden transform transition-all scale-100">
-                        <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-6 text-white text-center relative">
-                            <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
-                                <FaTimes />
-                            </button>
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 mb-4">
-                                <FaCrown size={32} />
-                            </div>
-                            <h3 className="text-2xl font-bold">Upgrade to Premium</h3>
-                            <p className="text-white/80 mt-1">Unlock the full power of BuildFolio</p>
-                        </div>
-
-                        <div className="p-6 space-y-4">
-                            <div className="space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
-                                    <p className="text-sm font-medium text-slate-700">Publish your portfolio to a live link</p>
+            {
+                showUpgradeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-0 overflow-hidden transform transition-all scale-100">
+                            <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-6 text-white text-center relative">
+                                <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
+                                    <FaTimes />
+                                </button>
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 mb-4">
+                                    <FaCrown size={32} />
                                 </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
-                                    <p className="text-sm font-medium text-slate-700">Remove 'DRAFT' watermark from resumes</p>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
-                                    <p className="text-sm font-medium text-slate-700">Custom subdomains (coming soon)</p>
-                                </div>
+                                <h3 className="text-2xl font-bold">Upgrade to Premium</h3>
+                                <p className="text-white/80 mt-1">Unlock the full power of BuildFolio</p>
                             </div>
 
-                            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                                <span className="text-4xl font-bold text-slate-900">$9</span>
-                                <span className="text-slate-500 ml-1 font-medium">one-time</span>
+                            <div className="p-6 space-y-4">
+                                <div className="space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
+                                        <p className="text-sm font-medium text-slate-700">Publish your portfolio to a live link</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
+                                        <p className="text-sm font-medium text-slate-700">Remove 'DRAFT' watermark from resumes</p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
+                                        <p className="text-sm font-medium text-slate-700">Custom subdomains (coming soon)</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
+                                    <span className="text-4xl font-bold text-slate-900">$9</span>
+                                    <span className="text-slate-500 ml-1 font-medium">one-time</span>
+                                </div>
+
+                                <button
+                                    onClick={handleUpgradeToPremium}
+                                    className="w-full py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl font-bold hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                                >
+                                    Upgrade Now
+                                </button>
+
+                                <p className="text-center text-xs text-slate-400">
+                                    🔒 Secure payment via Stripe
+                                </p>
                             </div>
-
-                            <button
-                                onClick={handleUpgradeToPremium}
-                                className="w-full py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl font-bold hover:shadow-lg transition-all transform hover:-translate-y-0.5"
-                            >
-                                Upgrade Now
-                            </button>
-
-                            <p className="text-center text-xs text-slate-400">
-                                🔒 Secure payment via Stripe
-                            </p>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </div >
     );
 };
@@ -810,18 +826,6 @@ const InputGroup = ({ label, value, onChange, type = "text", placeholder = "", a
             {error}
         </p>}
     </div>
-);
-
-const SaveButton = ({ onSave, hasChange, label = "Save Changes", savedLabel = "Saved" }) => (
-    <button
-        onClick={onSave}
-        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all shadow-sm
-            ${hasChange
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200'
-                : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`}
-    >
-        <FaCheck /> {hasChange ? label : savedLabel}
-    </button>
 );
 
 const tabs = [
