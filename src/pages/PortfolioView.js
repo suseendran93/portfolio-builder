@@ -13,8 +13,8 @@ import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 
 const PortfolioView = ({ publicMode = false }) => {
-    const { portfolioData } = useContext(PortfolioContext);
-    const { logout } = useAuth();
+    const { currentUser, userData, loading: authLoading, logout } = useAuth();
+    const { portfolioData, updatePortfolioData, loading: portfolioLoading, error } = useContext(PortfolioContext);
     const navigate = useNavigate();
 
     const education = useRef(null);
@@ -70,7 +70,12 @@ const PortfolioView = ({ publicMode = false }) => {
                 <Hero
                     scrollToSection={scrollToSection}
                     refs={{ education, skills, work, contact }}
-                    downloadResumeButton={<ResumeDownload variant="secondary" showWatermark={!publicMode} />}
+                    downloadResumeButton={
+                        <ResumeDownload
+                            variant="secondary"
+                            showWatermark={!publicMode && userData?.tier === 'BASIC'}
+                        />
+                    }
                 />
             </div>
             {/* About section removed */}
