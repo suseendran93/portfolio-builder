@@ -11,6 +11,7 @@ import Education from "../../components/Education";
 import ResumeDownload from "../../components/ResumeDownload/ResumeDownload";
 import { useAuth } from "../../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
+import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from '../../utils/customization';
 import './PortfolioView.scss';
 
 const PortfolioView = ({ publicMode = false }) => {
@@ -35,10 +36,11 @@ const PortfolioView = ({ publicMode = false }) => {
         }
     };
 
-    const customization = portfolioData.customization?.portfolio || { theme: 'light', layout: 'modern', accentColor: '#4f46e5' };
+    const customization = normalizeCustomization(portfolioData.customization).portfolio || DEFAULT_PORTFOLIO_CUSTOMIZATION;
+    const { layout, theme } = customization;
 
     const getThemeClasses = () => {
-        switch (customization.theme) {
+        switch (theme) {
             case 'dark': return 'bg-slate-900 text-slate-100';
             case 'royal': return 'bg-indigo-900 text-white';
             default: return 'bg-slate-50 text-slate-900';
@@ -46,7 +48,7 @@ const PortfolioView = ({ publicMode = false }) => {
     };
 
     return (
-        <div className={`portfolio-view ${getThemeClasses()}`}>
+        <div className={`portfolio-view portfolio-view--layout-${layout} ${getThemeClasses()}`}>
             {!publicMode && (
                 <div className="portfolio-view__toolbar">
                     <button

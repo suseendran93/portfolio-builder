@@ -1,30 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaPalette, FaDesktop, FaFileAlt, FaCheck, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import {
+    DEFAULT_PORTFOLIO_CUSTOMIZATION,
+    DEFAULT_RESUME_CUSTOMIZATION,
+    PORTFOLIO_LAYOUT_OPTIONS,
+    PORTFOLIO_THEME_OPTIONS,
+    RESUME_LAYOUT_OPTIONS,
+    normalizeHexColor,
+    parseHexColor
+} from '../../utils/customization';
 import './Customizer.scss';
 
 const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
     const [step, setStep] = useState(1); // 1: Portfolio, 2: Resume
+    const [colorDrafts, setColorDrafts] = useState({
+        portfolio: localData.customization.portfolio.accentColor,
+        resume: localData.customization.resume.accentColor
+    });
 
-    const portfolioOptions = {
-        layouts: [
-            { id: 'modern', name: 'Modern', description: 'Clean and professional with 70/30 split' },
-            { id: 'classic', name: 'Classic', description: 'Traditional centered layout' },
-            { id: 'creative', name: 'Creative', description: 'Bold typography and dynamic shapes' }
-        ],
-        themes: [
-            { id: 'light', name: 'Light', bg: 'bg-slate-50', text: 'text-slate-900' },
-            { id: 'dark', name: 'Dark', bg: 'bg-slate-900', text: 'text-slate-50' },
-            { id: 'royal', name: 'Royal', bg: 'bg-indigo-900', text: 'text-white' }
-        ]
-    };
-
-    const resumeOptions = {
-        layouts: [
-            { id: 'standard', name: 'Standard', description: 'Best for ATS compatibility' },
-            { id: 'executive', name: 'Executive', description: 'Sleek design for senior roles' },
-            { id: 'minimal', name: 'Minimal', description: 'Elegant and whitespace-focused' }
-        ]
-    };
+    useEffect(() => {
+        setColorDrafts({
+            portfolio: localData.customization.portfolio.accentColor,
+            resume: localData.customization.resume.accentColor
+        });
+    }, [
+        localData.customization.portfolio.accentColor,
+        localData.customization.resume.accentColor
+    ]);
 
     const updatePortfolio = (field, value) => {
         setLocalData(prev => ({
@@ -52,6 +54,45 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
         }));
     };
 
+    const handleColorDraftChange = (target, nextValue) => {
+        setColorDrafts(prev => ({
+            ...prev,
+            [target]: nextValue
+        }));
+
+        const parsedColor = parseHexColor(nextValue);
+        if (!parsedColor) {
+            return;
+        }
+
+        if (target === 'portfolio') {
+            updatePortfolio('accentColor', parsedColor);
+            return;
+        }
+
+        updateResume('accentColor', parsedColor);
+    };
+
+    const handleColorDraftBlur = (target) => {
+        const currentValue = colorDrafts[target];
+        const fallback = target === 'portfolio'
+            ? localData.customization.portfolio.accentColor || DEFAULT_PORTFOLIO_CUSTOMIZATION.accentColor
+            : localData.customization.resume.accentColor || DEFAULT_RESUME_CUSTOMIZATION.accentColor;
+        const normalizedColor = normalizeHexColor(currentValue, fallback);
+
+        setColorDrafts(prev => ({
+            ...prev,
+            [target]: normalizedColor
+        }));
+
+        if (target === 'portfolio') {
+            updatePortfolio('accentColor', normalizedColor);
+            return;
+        }
+
+        updateResume('accentColor', normalizedColor);
+    };
+
     return (
         <div className="customizer">
             <div className="customizer__header">
@@ -75,8 +116,9 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                             <FaDesktop className="customizer__section-icon" /> Choose Portfolio Layout
                         </h3>
                         <div className="customizer__option-grid">
-                            {portfolioOptions.layouts.map(layout => (
+                            {PORTFOLIO_LAYOUT_OPTIONS.map(layout => (
                                 <button
+                                    type="button"
                                     key={layout.id}
                                     onClick={() => updatePortfolio('layout', layout.id)}
                                     className={`customizer__option-card ${localData.customization.portfolio.layout === layout.id
@@ -100,8 +142,9 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                             <FaPalette className="customizer__section-icon" /> Select Theme
                         </h3>
                         <div className="customizer__option-grid">
-                            {portfolioOptions.themes.map(theme => (
+                            {PORTFOLIO_THEME_OPTIONS.map(theme => (
                                 <button
+                                    type="button"
                                     key={theme.id}
                                     onClick={() => updatePortfolio('theme', theme.id)}
                                     className={`customizer__theme-card ${localData.customization.portfolio.theme === theme.id
@@ -133,13 +176,14 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                             <div className="customizer__color-field">
                                 <input
                                     type="text"
-                                    value={localData.customization.portfolio.accentColor}
-                                    onChange={(e) => updatePortfolio('accentColor', e.target.value)}
+                                    value={colorDrafts.portfolio}
+                                    onChange={(e) => handleColorDraftChange('portfolio', e.target.value)}
+                                    onBlur={() => handleColorDraftBlur('portfolio')}
                                     className="customizer__color-text"
                                     placeholder="#000000"
                                 />
                             </div>
-                            <p className="customizer__color-help">This color will be used for buttons, links, and highlights.</p>
+                            <p className="customizer__color-help">Used for buttons, links, and highlights. Invalid values snap back to the closest saved color.</p>
                         </div>
                     </section>
                 </div>
@@ -151,8 +195,9 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                             <FaFileAlt className="customizer__section-icon" /> Choose Resume Layout
                         </h3>
                         <div className="customizer__option-grid">
-                            {resumeOptions.layouts.map(layout => (
+                            {RESUME_LAYOUT_OPTIONS.map(layout => (
                                 <button
+                                    type="button"
                                     key={layout.id}
                                     onClick={() => updateResume('layout', layout.id)}
                                     className={`customizer__option-card ${localData.customization.resume.layout === layout.id
@@ -185,13 +230,14 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                             <div className="customizer__color-field">
                                 <input
                                     type="text"
-                                    value={localData.customization.resume.accentColor}
-                                    onChange={(e) => updateResume('accentColor', e.target.value)}
+                                    value={colorDrafts.resume}
+                                    onChange={(e) => handleColorDraftChange('resume', e.target.value)}
+                                    onBlur={() => handleColorDraftBlur('resume')}
                                     className="customizer__color-text"
                                     placeholder="#000000"
                                 />
                             </div>
-                            <p className="customizer__color-help">Used for resume headings and section dividers.</p>
+                            <p className="customizer__color-help">Used for headings, dividers, and date treatments in the exported PDF.</p>
                         </div>
                     </section>
                 </div>
@@ -200,12 +246,14 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
             {/* Navigation */}
             <div className="customizer__footer">
                 <button
+                    type="button"
                     onClick={step === 1 ? onBack : () => setStep(1)}
                     className="customizer__footer-action customizer__footer-action--secondary"
                 >
                     <FaArrowLeft /> {step === 1 ? 'Back to Data' : 'Portfolio Setup'}
                 </button>
                 <button
+                    type="button"
                     onClick={step === 1 ? () => setStep(2) : onComplete}
                     className="customizer__footer-action customizer__footer-action--primary"
                 >

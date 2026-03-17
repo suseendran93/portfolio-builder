@@ -1,11 +1,12 @@
 import React, { useState, useContext } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { PortfolioContext } from "../../context/PortfolioContext";
+import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from "../../utils/customization";
 import "./Navbar.scss";
 
 const NavbarHeader = ({ scrollToSection, refs }) => {
   const { portfolioData } = useContext(PortfolioContext);
-  const customization = portfolioData.customization?.portfolio || { theme: 'light', accentColor: '#4f46e5' };
+  const customization = normalizeCustomization(portfolioData.customization).portfolio || DEFAULT_PORTFOLIO_CUSTOMIZATION;
   const { theme, accentColor } = customization;
   const isDark = theme === 'dark' || theme === 'royal';
 

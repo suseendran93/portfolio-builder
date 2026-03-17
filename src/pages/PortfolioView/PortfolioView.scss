@@ -31,3 +31,28 @@
     @apply bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm;
   }
 }
+
+.portfolio-view--layout-classic {
+  .portfolio-view__toolbar {
+    @apply rounded-xl top-20 right-6;
+  }
+
+  .portfolio-view__toolbar-button {
+    @apply rounded-lg;
+  }
+
+  .portfolio-view__footer {
+    @apply bg-slate-100;
+  }
+}
+
+.portfolio-view--layout-creative {
+  .portfolio-view__toolbar {
+    @apply top-6 right-6 rounded-2xl;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+  }
+
+  .portfolio-view__footer {
+    @apply bg-transparent border-t-white/10 text-slate-300;
+  }
+}

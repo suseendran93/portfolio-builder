@@ -67,3 +67,27 @@
     }
   }
 }
+
+.portfolio-view--layout-classic {
+  .portfolio-nav__container {
+    @apply max-w-5xl px-6;
+  }
+
+  .portfolio-nav__menu {
+    @apply gap-6;
+  }
+}
+
+.portfolio-view--layout-creative {
+  .portfolio-nav__container {
+    @apply max-w-7xl px-6 py-4;
+  }
+
+  .portfolio-nav__menu {
+    @apply gap-10;
+  }
+
+  .portfolio-nav__item {
+    @apply tracking-wide uppercase text-sm;
+  }
+}

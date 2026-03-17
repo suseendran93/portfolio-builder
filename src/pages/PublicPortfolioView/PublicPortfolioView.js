@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { PortfolioContext } from '../../context/PortfolioContext';
 import PortfolioView from '../PortfolioView/PortfolioView';
 import { loadPublicPortfolioBySlug } from '../../utils/portfolioStorage';
+import { normalizePortfolioData } from '../../utils/customization';
 import './PublicPortfolioView.scss';
 
 const PublicPortfolioView = () => {
@@ -28,7 +29,7 @@ const PublicPortfolioView = () => {
                 const foundData = await loadPublicPortfolioBySlug(slug);
 
                 if (foundData) {
-                    setPortfolioData(foundData);
+                    setPortfolioData(normalizePortfolioData(foundData));
                 } else {
                     setError("Portfolio not found.");
                 }

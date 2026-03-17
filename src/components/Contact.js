@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { FaMobileAlt, FaEnvelope, FaLinkedin, FaGithub } from "react-icons/fa";
+import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from "../utils/customization";
 import "./Contact/Contact.scss";
 
 const Contact = () => {
   const { portfolioData } = useContext(PortfolioContext);
-  const customization = portfolioData.customization?.portfolio || { theme: 'light', accentColor: '#4f46e5' };
+  const customization = normalizeCustomization(portfolioData.customization).portfolio || DEFAULT_PORTFOLIO_CUSTOMIZATION;
   const { theme, accentColor } = customization;
   const isDark = theme === 'dark' || theme === 'royal';
 

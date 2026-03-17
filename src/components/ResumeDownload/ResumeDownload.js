@@ -3,6 +3,8 @@ import { PortfolioContext } from '../../context/PortfolioContext';
 import { FaDownload } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import html2pdf from 'html2pdf.js';
+import { DEFAULT_RESUME_CUSTOMIZATION, normalizeCustomization } from '../../utils/customization';
+import { getResumeStyles } from '../../utils/resumeStyles';
 import './ResumeDownload.scss';
 
 const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = false }) => {
@@ -43,8 +45,8 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
         }
     };
 
-    const resumeCustom = portfolioData.customization?.resume || { layout: 'standard', accentColor: '#1e293b' };
-    const resumeAccent = resumeCustom.accentColor;
+    const resumeCustom = normalizeCustomization(portfolioData.customization).resume || DEFAULT_RESUME_CUSTOMIZATION;
+    const { accentColor: resumeAccent, layout: resumeLayout } = resumeCustom;
 
     // Watermark SVG Pattern
     const watermarkSvg = `
@@ -58,7 +60,7 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
     const workEntries = portfolioData.work || [];
 
     // Dynamic Styles for PDF
-    const pdfStyles = getStyles(resumeAccent);
+    const pdfStyles = getResumeStyles(resumeAccent, resumeLayout);
 
     return (
         <>
@@ -229,187 +231,5 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
         </>
     );
 };
-
-/* ─── Inline Styles for PDF Rendering ─── */
-const textDark = '#1e293b';
-const textMuted = '#475569';
-const borderLight = '#e2e8f0';
-
-const getStyles = (accentColor) => ({
-    page: {
-        width: '100%',
-        maxWidth: '794px',
-        fontFamily: "Arial, Helvetica, sans-serif",
-        color: textDark,
-        backgroundColor: '#ffffff',
-        padding: '40px',
-        lineHeight: '1.55',
-        boxSizing: 'border-box',
-        wordBreak: 'break-word',
-        overflowWrap: 'break-word',
-        borderTop: `8px solid ${accentColor}`,
-    },
-    /* ── Header (using table for reliable layout) ── */
-    headerTable: {
-        width: '100%',
-        borderCollapse: 'collapse',
-        tableLayout: 'fixed',
-    },
-    profilePicCell: {
-        width: '85px',
-        verticalAlign: 'top',
-        paddingRight: '14px',
-    },
-    profilePic: {
-        width: '72px',
-        height: '72px',
-        borderRadius: '50%',
-        objectFit: 'cover',
-        border: `3px solid ${accentColor}`,
-        display: 'block',
-    },
-    headerLeftCell: {
-        verticalAlign: 'top',
-        paddingRight: '12px',
-    },
-    headerRightCell: {
-        verticalAlign: 'top',
-        textAlign: 'right',
-        width: '200px',
-        wordBreak: 'break-all',
-        overflowWrap: 'break-word',
-    },
-    name: {
-        fontSize: '26px',
-        fontWeight: '700',
-        color: textDark,
-        margin: '0 0 3px 0',
-        letterSpacing: '-0.3px',
-        lineHeight: '1.2',
-    },
-    title: {
-        fontSize: '14px',
-        fontWeight: '600',
-        color: accentColor,
-        margin: '0',
-        letterSpacing: '0.3px',
-    },
-    contactItem: {
-        fontSize: '10px',
-        color: textMuted,
-        margin: '1px 0',
-        lineHeight: '1.5',
-        wordBreak: 'break-all',
-        overflowWrap: 'break-word',
-    },
-    headerDivider: {
-        height: '3px',
-        background: accentColor,
-        borderRadius: '2px',
-        margin: '10px 0 16px 0',
-    },
-    /* ── Sections ── */
-    section: {
-        marginBottom: '16px',
-    },
-    sectionTitle: {
-        fontSize: '13px',
-        fontWeight: '700',
-        color: accentColor,
-        textTransform: 'uppercase',
-        letterSpacing: '1.5px',
-        borderBottom: `2px solid ${accentColor}22`,
-        paddingBottom: '5px',
-        marginBottom: '10px',
-    },
-    /* ── Entries ── */
-    entry: {
-        marginBottom: '10px',
-        paddingLeft: '10px',
-        borderLeft: `3px solid ${borderLight}`,
-    },
-    entryHeaderTable: {
-        width: '100%',
-        borderCollapse: 'collapse',
-        tableLayout: 'fixed',
-        marginBottom: '3px',
-    },
-    entryHeaderLeft: {
-        verticalAlign: 'top',
-        paddingRight: '10px',
-    },
-    entryHeaderRight: {
-        verticalAlign: 'top',
-        textAlign: 'right',
-        width: '180px',
-        whiteSpace: 'nowrap',
-    },
-    entryTitle: {
-        fontSize: '13px',
-        fontWeight: '700',
-        color: textDark,
-        margin: '0',
-        lineHeight: '1.3',
-    },
-    entrySubtitle: {
-        fontSize: '12px',
-        fontWeight: '600',
-        color: accentColor,
-        margin: '1px 0 0 0',
-    },
-    dateBadge: {
-        fontSize: '10px',
-        fontWeight: '600',
-        color: textMuted,
-        backgroundColor: '#f1f5f9',
-        padding: '2px 8px',
-        borderRadius: '10px',
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-    },
-    /* ── Text & Sub-sections ── */
-    subSection: {
-        marginTop: '5px',
-    },
-    subHeading: {
-        fontSize: '10px',
-        fontWeight: '700',
-        color: textDark,
-        margin: '0 0 1px 0',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-    },
-    text: {
-        fontSize: '11px',
-        color: textMuted,
-        margin: '4px 0 0 0',
-        lineHeight: '1.6',
-        wordBreak: 'break-word',
-        overflowWrap: 'break-word',
-        whiteSpace: 'pre-line',
-    },
-    /* ── Work Entry Divider ── */
-    entryDivider: {
-        height: '1px',
-        backgroundColor: '#e2e8f0',
-        margin: '8px 20px 12px 10px',
-    },
-    /* ── Skills ── */
-    skillsGrid: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '6px',
-    },
-    skillTag: {
-        fontSize: '10px',
-        fontWeight: '600',
-        color: accentColor,
-        backgroundColor: `${accentColor}11`,
-        padding: '4px 12px',
-        borderRadius: '14px',
-        border: `1px solid ${accentColor}33`,
-        display: 'inline-block',
-    },
-});
 
 export default ResumeDownload;

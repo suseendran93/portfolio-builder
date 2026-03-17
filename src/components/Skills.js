@@ -4,11 +4,12 @@ import { IoLogoJavascript, IoLogoCss3, IoLogoHtml5, IoLogoReact, IoLogoGithub, I
 import { FaBootstrap } from "react-icons/fa"
 import { DiMongodb } from "react-icons/di";
 import { VscVscode } from "react-icons/vsc";
+import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from "../utils/customization";
 import "./Skills/Skills.scss";
 
 const Skills = () => {
   const { portfolioData } = useContext(PortfolioContext);
-  const customization = portfolioData.customization?.portfolio || { theme: 'light', accentColor: '#4f46e5' };
+  const customization = normalizeCustomization(portfolioData.customization).portfolio || DEFAULT_PORTFOLIO_CUSTOMIZATION;
   const { theme } = customization;
   const isDark = theme === 'dark' || theme === 'royal';
 

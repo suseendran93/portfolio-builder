@@ -112,3 +112,37 @@
     }
   }
 }
+
+.portfolio-view--layout-classic {
+  .skills-section__content {
+    @apply lg:w-8/12;
+  }
+
+  .skills-section__panel,
+  .skills-section__card {
+    @apply rounded-lg;
+  }
+}
+
+.portfolio-view--layout-creative {
+  .skills-section__content {
+    @apply lg:w-11/12;
+  }
+
+  .skills-section__panel {
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+  }
+
+  .skills-section__grid {
+    @apply gap-5 md:grid-cols-3 lg:grid-cols-5;
+  }
+
+  .skills-section__card {
+    @apply rounded-2xl;
+    transform: rotate(-1deg);
+  }
+
+  .skills-section__cell:nth-child(even) .skills-section__card {
+    transform: rotate(1deg);
+  }
+}

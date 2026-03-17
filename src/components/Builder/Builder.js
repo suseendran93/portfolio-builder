@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette } from 'react-icons/fa';
 import Customizer from './Customizer';
 import { savePortfolioForUser } from '../../utils/portfolioStorage';
+import { createDefaultPortfolioData, normalizePortfolioData } from '../../utils/customization';
 import './Builder.scss';
 
 // Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
@@ -21,7 +22,7 @@ const formatDateDisplay = (dateStr) => {
 };
 
 const Builder = () => {
-    const { portfolioData, updatePortfolioData } = useContext(PortfolioContext);
+    const { portfolioData, replacePortfolioData } = useContext(PortfolioContext);
     const { currentUser, userData, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('about');
@@ -39,23 +40,7 @@ const Builder = () => {
     const [isPortfolioReady, setIsPortfolioReady] = useState(false);
 
     // Local state for form data
-    const [localData, setLocalData] = useState({
-        name: "",
-        title: "",
-        profilePic: null,
-        about: "",
-        education: [],
-        work: [],
-        skills: [],
-        customSlug: "",
-        published: false,
-        publishedAt: null,
-        contact: { phone: "", email: "", linkedin: "", github: "" },
-        customization: {
-            portfolio: { layout: "modern", theme: "light", accentColor: "#4f46e5" },
-            resume: { layout: "standard", theme: "classic", accentColor: "#1e293b" }
-        }
-    });
+    const [localData, setLocalData] = useState(createDefaultPortfolioData);
 
 
     // Check validation whenever data changes
@@ -115,25 +100,13 @@ const Builder = () => {
 
     useEffect(() => {
         if (portfolioData) {
-            setLocalData({
-                name: portfolioData.name || "",
-                title: portfolioData.title || "",
-                profilePic: portfolioData.profilePic || null,
-                about: portfolioData.about || "",
-                education: portfolioData.education || [],
-                work: portfolioData.work || [],
-                skills: portfolioData.skills || [],
-                customSlug: portfolioData.customSlug || "",
-                published: Boolean(portfolioData.published),
-                publishedAt: portfolioData.publishedAt || null,
-                contact: portfolioData.contact || { phone: "", email: "", linkedin: "", github: "" },
-                customization: portfolioData.customization || {
-                    portfolio: { layout: "modern", theme: "light", accentColor: "#4f46e5" },
-                    resume: { layout: "standard", theme: "classic", accentColor: "#1e293b" }
-                }
-            });
+            setLocalData(normalizePortfolioData(portfolioData));
         }
     }, [portfolioData]);
+
+    const syncLocalDraftToContext = (nextData = localData) => {
+        replacePortfolioData(nextData);
+    };
 
     const handleLogout = async () => {
         try {
@@ -152,6 +125,7 @@ const Builder = () => {
             toast.error("Please fill in all required fields to preview.");
             return;
         }
+        syncLocalDraftToContext();
         navigate('/preview');
     };
 
@@ -180,11 +154,11 @@ const Builder = () => {
         });
     };
 
-    const saveToFirestore = async (dataToSave = portfolioData, { publish = false } = {}) => {
+    const saveToFirestore = async (dataToSave = localData, { publish = false } = {}) => {
         if (!currentUser) throw new Error("Please log in to save.");
 
         try {
-            const cleanData = JSON.parse(JSON.stringify(dataToSave));
+            const cleanData = JSON.parse(JSON.stringify(normalizePortfolioData(dataToSave)));
             let urlSlug = cleanData.customSlug;
 
             if (publish && !urlSlug) {
@@ -192,7 +166,6 @@ const Builder = () => {
                 const randomPart = Math.floor(1000 + Math.random() * 9000);
                 urlSlug = `${namePart}-${randomPart}`;
                 cleanData.customSlug = urlSlug;
-                updatePortfolioData('customSlug', urlSlug);
             }
 
             if (publish) {
@@ -226,20 +199,14 @@ const Builder = () => {
         try {
             // Save the latest local data before generating the URL
             const publishData = {
-                ...localData,
+                ...normalizePortfolioData(localData),
                 published: true,
                 publishedAt: localData.publishedAt || new Date().toISOString()
             };
             const { urlSlug, cleanData } = await saveToFirestore(publishData, { publish: true });
-            setLocalData(prev => ({
-                ...prev,
-                customSlug: cleanData.customSlug || "",
-                published: true,
-                publishedAt: cleanData.publishedAt
-            }));
-            updatePortfolioData('customSlug', cleanData.customSlug || "");
-            updatePortfolioData('published', true);
-            updatePortfolioData('publishedAt', cleanData.publishedAt);
+            const nextData = normalizePortfolioData(cleanData);
+            setLocalData(nextData);
+            replacePortfolioData(nextData);
             const baseUrl = window.location.href.split('#')[0].replace(/\/$/, "");
             setGeneratedUrl(`${baseUrl}/#/p/${urlSlug}`);
             setShowModal(true);
@@ -262,13 +229,13 @@ const Builder = () => {
         }
 
         // Sync all local sections to PortfolioContext
-        Object.entries(localData).forEach(([key, value]) => {
-            updatePortfolioData(key, value);
-        });
+        const normalizedData = normalizePortfolioData(localData);
+
+        syncLocalDraftToContext(normalizedData);
 
         try {
             // Sync entire state to Firestore
-            await saveToFirestore(localData);
+            await saveToFirestore(normalizedData);
             toast.success("Changes saved.");
 
         } catch (error) {
@@ -392,6 +359,7 @@ const Builder = () => {
                                     localData={localData}
                                     setLocalData={setLocalData}
                                     onComplete={() => {
+                                        syncLocalDraftToContext(localData);
                                         toast.success("Design preferences saved! You can now preview or publish.");
                                         setIsCustomizing(false);
                                     }}

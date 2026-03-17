@@ -1,43 +1,13 @@
 import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { loadPortfolioForUser } from '../utils/portfolioStorage';
+import { createDefaultPortfolioData, normalizePortfolioData } from '../utils/customization';
 
 export const PortfolioContext = createContext();
 
-const getInitialState = () => ({
-  about: "",
-  name: "",
-  title: "",
-  profilePic: null,
-  work: [],
-  education: [],
-  skills: [],
-  customSlug: "",
-  published: false,
-  publishedAt: null,
-  contact: {
-    phone: "",
-    email: "",
-    github: "",
-    linkedin: ""
-  },
-  customization: {
-    portfolio: {
-      layout: "modern",
-      theme: "light",
-      accentColor: "#4f46e5"
-    },
-    resume: {
-      layout: "standard",
-      theme: "classic",
-      accentColor: "#1e293b"
-    }
-  }
-});
-
 export const PortfolioProvider = ({ children }) => {
   const { currentUser } = useAuth();
-  const [portfolioData, setPortfolioData] = useState(getInitialState());
+  const [portfolioData, setPortfolioData] = useState(createDefaultPortfolioData);
 
   // Fetch data when user logs in or changes
   useEffect(() => {
@@ -49,13 +19,10 @@ export const PortfolioProvider = ({ children }) => {
 
           if (storedPortfolio) {
             console.log("PortfolioContext: Loaded portfolio data from Firestore");
-            setPortfolioData(prev => ({
-              ...prev,
-              ...storedPortfolio
-            }));
+            setPortfolioData(normalizePortfolioData(storedPortfolio));
           } else {
             console.log("PortfolioContext: No existing data in Firestore, using empty state");
-            setPortfolioData(getInitialState());
+            setPortfolioData(createDefaultPortfolioData());
           }
         } catch (error) {
           console.error("PortfolioContext: Error fetching portfolio data:", error);
@@ -63,15 +30,19 @@ export const PortfolioProvider = ({ children }) => {
       } else {
         // User is logged out, reset state
         console.log("PortfolioContext: User logged out, clearing state");
-        setPortfolioData(getInitialState());
+        setPortfolioData(createDefaultPortfolioData());
       }
     };
 
     fetchData();
   }, [currentUser]);
 
+  const replacePortfolioData = (nextData) => {
+    setPortfolioData(normalizePortfolioData(nextData));
+  };
+
   const updatePortfolioData = (section, data) => {
-    setPortfolioData(prev => ({
+    setPortfolioData(prev => normalizePortfolioData({
       ...prev,
       [section]: data
     }));
@@ -79,7 +50,8 @@ export const PortfolioProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     portfolioData,
-    updatePortfolioData
+    updatePortfolioData,
+    replacePortfolioData
   }), [portfolioData]);
 
   return (

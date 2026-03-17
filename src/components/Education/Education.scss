@@ -118,3 +118,43 @@
     @apply text-center text-slate-500 py-10;
   }
 }
+
+.portfolio-view--layout-classic {
+  .education-section__content {
+    @apply lg:w-7/12;
+  }
+
+  .education-section__card {
+    @apply rounded-lg px-7;
+  }
+
+  .education-section__date {
+    @apply rounded-md;
+  }
+}
+
+.portfolio-view--layout-creative {
+  .education-section__content {
+    @apply lg:w-10/12;
+  }
+
+  .education-section__heading {
+    @apply text-left;
+  }
+
+  .education-section__divider {
+    @apply mx-0;
+  }
+
+  .education-section__list {
+    @apply md:grid md:grid-cols-2 md:gap-6 md:space-y-0;
+  }
+
+  .education-section__card {
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  }
+
+  .education-section__card:nth-child(odd) {
+    transform: translateY(-0.5rem);
+  }
+}

@@ -58,10 +58,12 @@ const portfolioData = {
   },
   customization: {
     portfolio: {
+      layout: "creative",
       theme: "light",
       accentColor: "#4f46e5"
     },
     resume: {
+      layout: "minimal",
       accentColor: "#1e293b"
     }
   }
@@ -100,7 +102,7 @@ describe("PortfolioView integration", () => {
   });
 
   it("renders the composed portfolio sections", () => {
-    renderPortfolioView();
+    const { container } = renderPortfolioView();
 
     expect(screen.getByText("Frontend Engineer")).toBeInTheDocument();
     expect(screen.getByText(/Hi, I'm/i)).toBeInTheDocument();
@@ -118,5 +120,6 @@ describe("PortfolioView integration", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Download Resume")).toBeInTheDocument();
     expect(screen.getByText(/Copyright: Test User/i)).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass("portfolio-view--layout-creative");
   });
 });
