@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaPalette, FaDesktop, FaFileAlt, FaCheck, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import './Customizer.scss';
 
 const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
     const [step, setStep] = useState(1); // 1: Portfolio, 2: Resume
@@ -52,65 +53,65 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center mb-8">
+        <div className="customizer">
+            <div className="customizer__header">
                 <div>
-                    <h2 className="text-3xl font-bold text-slate-900">Customize Your Style</h2>
-                    <p className="text-slate-500 mt-1">
+                    <h2 className="customizer__title">Customize Your Style</h2>
+                    <p className="customizer__subtitle">
                         {step === 1 ? 'Design your online portfolio' : 'Style your downloadable resume'}
                     </p>
                 </div>
-                <div className="flex gap-2">
-                    <div className={`h-2 w-12 rounded-full ${step >= 1 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
-                    <div className={`h-2 w-12 rounded-full ${step >= 2 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
+                <div className="customizer__progress">
+                    <div className={`customizer__progress-bar ${step >= 1 ? 'customizer__progress-bar--active' : ''}`} />
+                    <div className={`customizer__progress-bar ${step >= 2 ? 'customizer__progress-bar--active' : ''}`} />
                 </div>
             </div>
 
             {step === 1 ? (
-                <div className="space-y-8">
+                <div className="customizer__body">
                     {/* Portfolio Layouts */}
-                    <section>
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                            <FaDesktop className="text-indigo-600" /> Choose Portfolio Layout
+                    <section className="customizer__section">
+                        <h3 className="customizer__section-title">
+                            <FaDesktop className="customizer__section-icon" /> Choose Portfolio Layout
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="customizer__option-grid">
                             {portfolioOptions.layouts.map(layout => (
                                 <button
                                     key={layout.id}
                                     onClick={() => updatePortfolio('layout', layout.id)}
-                                    className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-md ${localData.customization.portfolio.layout === layout.id
-                                            ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-600'
-                                            : 'border-slate-200 hover:border-slate-300 bg-white'
+                                    className={`customizer__option-card ${localData.customization.portfolio.layout === layout.id
+                                            ? 'customizer__option-card--selected'
+                                            : 'customizer__option-card--default'
                                         }`}
                                 >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="font-bold text-slate-900">{layout.name}</span>
-                                        {localData.customization.portfolio.layout === layout.id && <FaCheck className="text-indigo-600" size={12} />}
+                                    <div className="customizer__option-meta">
+                                        <span className="customizer__option-name">{layout.name}</span>
+                                        {localData.customization.portfolio.layout === layout.id && <FaCheck className="customizer__check" size={12} />}
                                     </div>
-                                    <p className="text-xs text-slate-500">{layout.description}</p>
+                                    <p className="customizer__option-description">{layout.description}</p>
                                 </button>
                             ))}
                         </div>
                     </section>
 
                     {/* Portfolio Themes */}
-                    <section>
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                            <FaPalette className="text-indigo-600" /> Select Theme
+                    <section className="customizer__section">
+                        <h3 className="customizer__section-title">
+                            <FaPalette className="customizer__section-icon" /> Select Theme
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="customizer__option-grid">
                             {portfolioOptions.themes.map(theme => (
                                 <button
                                     key={theme.id}
                                     onClick={() => updatePortfolio('theme', theme.id)}
-                                    className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${localData.customization.portfolio.theme === theme.id
-                                            ? 'border-indigo-600 ring-1 ring-indigo-600'
-                                            : 'border-slate-200 hover:border-slate-300'
-                                        } ${theme.bg}`}
+                                    className={`customizer__theme-card ${localData.customization.portfolio.theme === theme.id
+                                            ? 'customizer__theme-card--selected'
+                                            : 'customizer__theme-card--default'
+                                        } ${theme.id === 'light' ? 'customizer__theme-card--light' : theme.id === 'dark' ? 'customizer__theme-card--dark' : 'customizer__theme-card--royal'}`}
                                 >
-                                    <div className="flex flex-col items-center">
-                                        <span className={`font-bold ${theme.text}`}>{theme.name}</span>
-                                        {localData.customization.portfolio.theme === theme.id && <FaCheck className="mt-2 text-indigo-400" />}
+                                    <div className="customizer__theme-content">
+                                        <span className={`customizer__theme-name ${theme.id === 'light' ? 'customizer__theme-name--light' : 'customizer__theme-name--dark'}`}>{theme.name}</span>
+                                        {localData.customization.portfolio.theme === theme.id && <FaCheck className="customizer__theme-check" />}
                                     </div>
                                 </button>
                             ))}
@@ -118,95 +119,95 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                     </section>
 
                     {/* Color Picker */}
-                    <section>
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2 text-slate-800">
-                            <span className="p-1 px-2 border rounded-md">#</span> Portfolio Accent Color
+                    <section className="customizer__section">
+                        <h3 className="customizer__section-title">
+                            <span className="customizer__section-chip">#</span> Portfolio Accent Color
                         </h3>
-                        <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="customizer__color-card">
                             <input
                                 type="color"
                                 value={localData.customization.portfolio.accentColor}
                                 onChange={(e) => updatePortfolio('accentColor', e.target.value)}
-                                className="w-12 h-12 rounded cursor-pointer border-none bg-transparent"
+                                className="customizer__color-input"
                             />
-                            <div className="flex-1">
+                            <div className="customizer__color-field">
                                 <input
                                     type="text"
                                     value={localData.customization.portfolio.accentColor}
                                     onChange={(e) => updatePortfolio('accentColor', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="customizer__color-text"
                                     placeholder="#000000"
                                 />
                             </div>
-                            <p className="text-xs text-slate-400">This color will be used for buttons, links, and highlights.</p>
+                            <p className="customizer__color-help">This color will be used for buttons, links, and highlights.</p>
                         </div>
                     </section>
                 </div>
             ) : (
-                <div className="space-y-8">
+                <div className="customizer__body">
                     {/* Resume Layouts */}
-                    <section>
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                            <FaFileAlt className="text-indigo-600" /> Choose Resume Layout
+                    <section className="customizer__section">
+                        <h3 className="customizer__section-title">
+                            <FaFileAlt className="customizer__section-icon" /> Choose Resume Layout
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="customizer__option-grid">
                             {resumeOptions.layouts.map(layout => (
                                 <button
                                     key={layout.id}
                                     onClick={() => updateResume('layout', layout.id)}
-                                    className={`p-4 rounded-xl border-2 text-left transition-all hover:shadow-md ${localData.customization.resume.layout === layout.id
-                                            ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-600'
-                                            : 'border-slate-200 hover:border-slate-300 bg-white'
+                                    className={`customizer__option-card ${localData.customization.resume.layout === layout.id
+                                            ? 'customizer__option-card--selected'
+                                            : 'customizer__option-card--default'
                                         }`}
                                 >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="font-bold text-slate-900">{layout.name}</span>
-                                        {localData.customization.resume.layout === layout.id && <FaCheck className="text-indigo-600" size={12} />}
+                                    <div className="customizer__option-meta">
+                                        <span className="customizer__option-name">{layout.name}</span>
+                                        {localData.customization.resume.layout === layout.id && <FaCheck className="customizer__check" size={12} />}
                                     </div>
-                                    <p className="text-xs text-slate-500">{layout.description}</p>
+                                    <p className="customizer__option-description">{layout.description}</p>
                                 </button>
                             ))}
                         </div>
                     </section>
 
                     {/* Resume Accent Color */}
-                    <section>
-                        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                            <span className="p-1 px-2 border rounded-md">#</span> Resume Accent Color
+                    <section className="customizer__section">
+                        <h3 className="customizer__section-title">
+                            <span className="customizer__section-chip">#</span> Resume Accent Color
                         </h3>
-                        <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="customizer__color-card">
                             <input
                                 type="color"
                                 value={localData.customization.resume.accentColor}
                                 onChange={(e) => updateResume('accentColor', e.target.value)}
-                                className="w-12 h-12 rounded cursor-pointer border-none bg-transparent"
+                                className="customizer__color-input"
                             />
-                            <div className="flex-1">
+                            <div className="customizer__color-field">
                                 <input
                                     type="text"
                                     value={localData.customization.resume.accentColor}
                                     onChange={(e) => updateResume('accentColor', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    className="customizer__color-text"
                                     placeholder="#000000"
                                 />
                             </div>
-                            <p className="text-xs text-slate-400">Used for resume headings and section dividers.</p>
+                            <p className="customizer__color-help">Used for resume headings and section dividers.</p>
                         </div>
                     </section>
                 </div>
             )}
 
             {/* Navigation */}
-            <div className="flex justify-between mt-12 pt-8 border-t border-slate-100">
+            <div className="customizer__footer">
                 <button
                     onClick={step === 1 ? onBack : () => setStep(1)}
-                    className="flex items-center gap-2 px-6 py-2 text-slate-600 font-medium hover:text-slate-900 transition-colors"
+                    className="customizer__footer-action customizer__footer-action--secondary"
                 >
                     <FaArrowLeft /> {step === 1 ? 'Back to Data' : 'Portfolio Setup'}
                 </button>
                 <button
                     onClick={step === 1 ? () => setStep(2) : onComplete}
-                    className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                    className="customizer__footer-action customizer__footer-action--primary"
                 >
                     {step === 1 ? 'Next: Resume Style' : 'Complete Selection'} <FaArrowRight />
                 </button>

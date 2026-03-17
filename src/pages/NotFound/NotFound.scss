@@ -1,0 +1,29 @@
+@use "../../styles/tokens" as *;
+
+.not-found {
+  @apply min-h-screen flex flex-col justify-center items-center bg-slate-50 text-center px-4 font-inter;
+
+  &__code {
+    @apply text-9xl font-extrabold mb-4 bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, $color-brand-primary, $color-brand-secondary);
+  }
+
+  &__title {
+    @apply text-2xl font-semibold text-slate-800 mb-2;
+  }
+
+  &__description {
+    @apply text-slate-500 mb-8 max-w-md;
+  }
+
+  &__action {
+    @apply px-8 py-3 text-white rounded-full font-medium transition-colors shadow-lg;
+    background-color: $color-brand-primary;
+
+    &:hover {
+      background-color: $color-brand-primary;
+      box-shadow: 0 1rem 2rem -1rem $color-brand-primary-glow;
+      filter: brightness(0.95);
+    }
+  }
+}

@@ -5,11 +5,11 @@ import App from "./App";
 
 const mockUseAuth = jest.fn();
 
-jest.mock("./context/AuthContext", () => ({
+jest.mock("../context/AuthContext", () => ({
   useAuth: () => mockUseAuth()
 }));
 
-jest.mock("./context/PortfolioContext", () => ({
+jest.mock("../context/PortfolioContext", () => ({
   PortfolioProvider: ({ children }) => <>{children}</>
 }));
 
@@ -17,14 +17,14 @@ jest.mock("react-hot-toast", () => ({
   Toaster: () => <div data-testid="toaster" />
 }));
 
-jest.mock("./components/Login/Login", () => () => <div>Login Screen</div>);
-jest.mock("./components/Signup/Signup", () => () => <div>Signup Screen</div>);
-jest.mock("./components/Builder/Builder", () => () => <div>Builder Screen</div>);
-jest.mock("./pages/PortfolioView", () => () => <div>Portfolio Preview</div>);
-jest.mock("./pages/PublicPortfolioView", () => () => <div>Public Portfolio</div>);
-jest.mock("./pages/Success", () => () => <div>Payment Success</div>);
-jest.mock("./pages/Cancel", () => () => <div>Payment Cancelled</div>);
-jest.mock("./pages/NotFound", () => () => <div>Not Found</div>);
+jest.mock("../components/Login/Login", () => () => <div>Login Screen</div>);
+jest.mock("../components/Signup/Signup", () => () => <div>Signup Screen</div>);
+jest.mock("../components/Builder/Builder", () => () => <div>Builder Screen</div>);
+jest.mock("../pages/PortfolioView/PortfolioView", () => () => <div>Portfolio Preview</div>);
+jest.mock("../pages/PublicPortfolioView/PublicPortfolioView", () => () => <div>Public Portfolio</div>);
+jest.mock("../pages/Success/Success", () => () => <div>Payment Success</div>);
+jest.mock("../pages/Cancel/Cancel", () => () => <div>Payment Cancelled</div>);
+jest.mock("../pages/NotFound/NotFound", () => () => <div>Not Found</div>);
 
 const renderAppAtRoute = (route = "/") =>
   render(

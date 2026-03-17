@@ -1,0 +1,202 @@
+@use "../../styles/tokens" as *;
+
+.hero {
+  @apply relative flex flex-col min-h-screen overflow-hidden pt-32 pb-20 transition-colors duration-500;
+  position: relative;
+  overflow: hidden;
+
+  &--light {
+    @apply bg-slate-50;
+  }
+
+  &--dark {
+    @apply bg-slate-900;
+  }
+
+  &--royal {
+    @apply bg-indigo-950 text-white;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: $space-0;
+    background: $gradient-hero-orb;
+    opacity: $opacity-visible;
+    z-index: $z-base;
+  }
+
+  &__backdrop {
+    @apply absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-30;
+  }
+
+  &__orb {
+    @apply absolute rounded-full;
+    filter: blur($blur-hero);
+
+    &--left {
+      top: -20%;
+      left: -10%;
+      width: 50%;
+      height: 50%;
+    }
+
+    &--right {
+      top: 40%;
+      right: -10%;
+      width: 40%;
+      height: 40%;
+    }
+
+    &--light {
+      @apply bg-gradient-to-r from-indigo-100 to-purple-100;
+    }
+
+    &--light-alt {
+      @apply bg-gradient-to-l from-blue-100 to-indigo-50;
+    }
+
+    &--dark {
+      background-color: rgba(49, 46, 129, 0.4);
+    }
+
+    &--dark-alt {
+      background-color: rgba(88, 28, 135, 0.2);
+    }
+  }
+
+  &__container {
+    @apply container mx-auto px-4 relative z-10 flex-1 flex items-center;
+  }
+
+  &__grid {
+    @apply w-full flex flex-col-reverse md:flex-row items-center justify-between gap-12;
+    position: relative;
+    z-index: $z-content;
+  }
+
+  &__content {
+    @apply w-full md:w-1/2 text-center md:text-left space-y-6;
+  }
+
+  &__eyebrow {
+    @apply text-2xl md:text-3xl font-medium mb-2;
+    color: var(--accent-color);
+  }
+
+  &__title {
+    @apply text-5xl md:text-7xl font-bold tracking-tight leading-tight;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__accent {
+    @apply text-transparent bg-clip-text;
+
+    &--light,
+    &--dark {
+      background-image: linear-gradient(to right, var(--accent-color), $color-brand-secondary);
+    }
+  }
+
+  &__description {
+    @apply text-lg md:text-xl leading-relaxed max-w-2xl mx-auto md:mx-0;
+
+    &--light {
+      @apply text-slate-600;
+    }
+
+    &--dark {
+      @apply text-slate-300;
+    }
+  }
+
+  &__actions {
+    @apply flex flex-wrap gap-4 justify-center md:justify-start pt-4;
+  }
+
+  &__button {
+    @apply px-8 py-3 rounded-full font-medium transition-all;
+
+    &--primary {
+      @apply text-white shadow-lg;
+      background-color: var(--accent-color);
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    &--secondary {
+      @apply bg-transparent border;
+    }
+
+    &--secondary-light {
+      @apply border-slate-200 text-slate-600;
+
+      &:hover {
+        @apply bg-slate-50;
+      }
+    }
+
+    &--secondary-dark {
+      @apply border-slate-700 text-slate-300;
+
+      &:hover {
+        @apply bg-slate-800;
+      }
+    }
+  }
+
+  &__media {
+    @apply w-full md:w-5/12 text-center relative;
+  }
+
+  &__image-frame {
+    @apply relative inline-block;
+  }
+
+  &__image-blob {
+    @apply absolute inset-0 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] blur-2xl opacity-50 scale-110 animate-pulse bg-gradient-to-tr from-indigo-200 to-violet-200;
+  }
+
+  &__image {
+    @apply relative z-10 w-64 h-64 md:w-80 md:h-80 object-cover rounded-[2rem] shadow-2xl rotate-3 border-4 border-white;
+    transition:
+      transform $duration-medium $easing-emphasized,
+      filter $duration-medium $easing-emphasized;
+    filter: $shadow-image;
+
+    &:hover {
+      transform: scale($size-hero-image-scale) rotate($space-0);
+      filter: $shadow-image-hover;
+    }
+
+    &--placeholder {
+      @apply flex items-center justify-center bg-white text-slate-200;
+    }
+  }
+
+  &__placeholder-icon {
+    @apply w-32 h-32;
+  }
+
+  &__scroll {
+    @apply absolute bottom-10 left-1/2 cursor-pointer animate-bounce text-slate-400 transition-colors;
+    transform: translateX(-50%);
+
+    &:hover {
+      color: var(--accent-color);
+    }
+  }
+}
+
+body.dark-mode .hero__image:hover {
+  filter: $shadow-image-hover-dark;
+}

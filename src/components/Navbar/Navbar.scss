@@ -1,0 +1,69 @@
+@use "../../styles/tokens" as *;
+
+.portfolio-nav {
+  @apply fixed top-0 left-0 right-0 border-b shadow-sm z-50 transition-all duration-300 backdrop-blur-md;
+
+  &--light {
+    @apply bg-white/90 border-slate-200;
+  }
+
+  &--dark {
+    @apply bg-slate-900/90 border-slate-800;
+  }
+
+  &--royal {
+    @apply bg-indigo-950/90 border-indigo-900;
+  }
+
+  &__container {
+    @apply container mx-auto px-4 py-3 flex justify-between items-center;
+  }
+
+  &__brand {
+    @apply font-bold text-xl text-slate-800;
+  }
+
+  &__menu {
+    @apply hidden sm:flex gap-8;
+  }
+
+  &__item {
+    @apply font-medium transition-colors cursor-pointer bg-transparent border-none p-0 text-base;
+
+    &--light {
+      @apply text-slate-600;
+    }
+
+    &--dark {
+      @apply text-slate-300;
+    }
+
+    &:hover {
+      color: var(--accent-color);
+    }
+  }
+
+  &__toggle {
+    @apply sm:hidden text-slate-600 focus:outline-none transition-colors;
+
+    &:hover {
+      color: var(--accent-color);
+    }
+  }
+
+  &__mobile {
+    @apply sm:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full left-0 top-full;
+  }
+
+  &__mobile-list {
+    @apply flex flex-col p-4 gap-4;
+  }
+
+  &__mobile-item {
+    @apply text-left font-medium text-slate-600 transition-colors py-2 border-b border-slate-50 last:border-none;
+
+    &:hover {
+      color: var(--accent-color);
+    }
+  }
+}

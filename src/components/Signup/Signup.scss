@@ -1,0 +1,98 @@
+@use "../../styles/tokens" as *;
+
+.signup {
+  @apply min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-inter p-4;
+
+  &__card {
+    @apply w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200;
+  }
+
+  &__content {
+    @apply p-8;
+  }
+
+  &__brand {
+    @apply text-center mb-8;
+  }
+
+  &__logo {
+    @apply h-16 w-auto mx-auto mb-6;
+  }
+
+  &__title {
+    @apply text-3xl font-bold bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, $color-brand-primary, $color-brand-secondary);
+  }
+
+  &__subtitle {
+    @apply text-slate-500 mt-2;
+  }
+
+  &__error {
+    @apply bg-red-50 text-red-600 p-4 rounded-lg mb-6 text-sm border border-red-100 flex items-center;
+  }
+
+  &__form {
+    @apply space-y-6;
+  }
+
+  &__field {
+    @apply block;
+  }
+
+  &__label {
+    @apply block text-sm font-medium text-slate-700 mb-1;
+  }
+
+  &__control {
+    @apply relative;
+  }
+
+  &__icon {
+    @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400;
+  }
+
+  &__input {
+    @apply block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 sm:text-sm;
+
+    &:focus {
+      @apply ring-2 ring-indigo-500 border-indigo-500;
+      outline: none;
+    }
+  }
+
+  &__submit {
+    @apply w-full flex justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium text-white border border-transparent transition-all;
+    background-image: linear-gradient(to right, $color-brand-primary, $color-brand-secondary);
+
+    &:hover:not(:disabled) {
+      transform: scale(1.02);
+      filter: brightness(0.95);
+    }
+
+    &:focus {
+      @apply ring-2 ring-offset-2 ring-indigo-500;
+      outline: none;
+    }
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed;
+    }
+  }
+
+  &__footer {
+    @apply mt-6 text-center;
+  }
+
+  &__footer-text {
+    @apply text-sm text-slate-600;
+  }
+
+  &__link {
+    @apply font-medium text-indigo-600 transition-colors;
+
+    &:hover {
+      @apply text-indigo-500;
+    }
+  }
+}

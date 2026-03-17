@@ -3,6 +3,7 @@ import { PortfolioContext } from '../../context/PortfolioContext';
 import { FaDownload } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import html2pdf from 'html2pdf.js';
+import './ResumeDownload.scss';
 
 const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = false }) => {
     const { portfolioData } = useContext(PortfolioContext);
@@ -66,7 +67,7 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
                 onClick={handleDownload}
                 disabled={downloading}
                 style={{ backgroundColor: variant === 'primary' ? resumeAccent : 'transparent', borderColor: resumeAccent, color: variant === 'primary' ? '#fff' : resumeAccent }}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${downloading ? 'opacity-60 cursor-wait' : ''} ${className} ${variant === 'secondary' ? 'border' : ''}`}
+                className={`resume-download__button ${downloading ? 'resume-download__button--loading' : ''} ${className} ${variant === 'secondary' ? 'resume-download__button--secondary' : 'resume-download__button--primary'}`}
             >
                 <FaDownload className={downloading ? 'animate-bounce' : ''} />
                 {downloading ? 'Generating…' : 'Download Portfolio Resume'}

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { FaBuilding } from "react-icons/fa";
+import "./Work/Work.scss";
 
 const Work = () => {
   const { portfolioData } = useContext(PortfolioContext);
@@ -11,58 +12,58 @@ const Work = () => {
   if (!portfolioData.work || portfolioData.work.length === 0) return null;
 
   return (
-    <section className={`py-20 transition-colors duration-500 ${isDark ? 'bg-transparent' : 'bg-white'}`}>
-      <div className="container mx-auto px-4">
-        <div className="flex justify-center">
-          <div className="w-full lg:w-8/12">
-            <div className="text-center mb-16">
-              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Work Experience</h2>
-              <div className="h-1 w-20 mx-auto rounded-full" style={{ backgroundColor: accentColor }}></div>
+    <section className={`work-section ${isDark ? 'work-section--dark' : 'work-section--light'}`} style={{ "--accent-color": accentColor }}>
+      <div className="work-section__container">
+        <div className="work-section__shell">
+          <div className="work-section__content">
+            <div className="work-section__heading">
+              <h2 className={`work-section__title ${isDark ? 'work-section__title--dark' : 'work-section__title--light'}`}>Work Experience</h2>
+              <div className="work-section__divider"></div>
             </div>
 
-            <div className="space-y-8">
+            <div className="work-section__list">
               {portfolioData.work && portfolioData.work.length > 0 ? (
                 portfolioData.work.map((item, idx) => (
-                  <div key={idx} className="relative pl-0">
+                  <div key={idx} className="work-section__item">
                     {/* Timeline connector for larger screens could go here, keeping it simple for now */}
-                    <div className={`p-8 rounded-2xl border transition-all duration-300 hover:shadow-lg ${isDark ? 'bg-slate-800/50 border-slate-700 hover:border-slate-600' : 'bg-slate-50 border-slate-100 hover:border-indigo-100'
+                    <div className={`work-section__card ${isDark ? 'work-section__card--dark' : 'work-section__card--light'
                       }`}>
-                      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
-                        <div className="flex items-center gap-3 mb-2 md:mb-0">
-                          <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-indigo-100'}`} style={{ color: accentColor }}>
+                      <div className="work-section__meta">
+                        <div className="work-section__identity">
+                          <div className={`work-section__icon ${isDark ? 'work-section__icon--dark' : 'work-section__icon--light'}`}>
                             <FaBuilding size={20} />
                           </div>
                           <div>
-                            <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            <h3 className={`work-section__company ${isDark ? 'work-section__company--dark' : 'work-section__company--light'}`}>
                               {typeof item === 'string' ? `Experience ${idx + 1}` : (item.company || "Company Name")}
                             </h3>
                             {typeof item !== 'string' && (
-                              <h4 className="font-medium" style={{ color: accentColor }}>{item.role || "Role"}</h4>
+                              <h4 className="work-section__role">{item.role || "Role"}</h4>
                             )}
                           </div>
                         </div>
                         {typeof item !== 'string' && (
-                          <div className={`text-sm font-semibold px-3 py-1 rounded-full ${isDark ? 'text-slate-400 bg-slate-700' : 'text-slate-500 bg-slate-100'}`}>
+                          <div className={`work-section__date ${isDark ? 'work-section__date--dark' : 'work-section__date--light'}`}>
                             {item.date || "Date"}
                           </div>
                         )}
                       </div>
 
                       {typeof item !== 'string' && item.responsibilities && (
-                        <div className="mt-3">
-                          <h5 className={`text-sm font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Roles & Responsibilities</h5>
-                          <p className={`leading-relaxed whitespace-pre-line ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.responsibilities}</p>
+                        <div className="work-section__detail">
+                          <h5 className={`work-section__detail-title ${isDark ? 'work-section__detail-title--dark' : 'work-section__detail-title--light'}`}>Roles & Responsibilities</h5>
+                          <p className={`work-section__detail-text ${isDark ? 'work-section__detail-text--dark' : 'work-section__detail-text--light'}`}>{item.responsibilities}</p>
                         </div>
                       )}
                       {typeof item !== 'string' && item.accomplishments && (
-                        <div className="mt-3">
-                          <h5 className={`text-sm font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Work Accomplishments</h5>
-                          <p className={`leading-relaxed whitespace-pre-line ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.accomplishments}</p>
+                        <div className="work-section__detail">
+                          <h5 className={`work-section__detail-title ${isDark ? 'work-section__detail-title--dark' : 'work-section__detail-title--light'}`}>Work Accomplishments</h5>
+                          <p className={`work-section__detail-text ${isDark ? 'work-section__detail-text--dark' : 'work-section__detail-text--light'}`}>{item.accomplishments}</p>
                         </div>
                       )}
                       {/* Legacy fallback for old data with description */}
                       {typeof item !== 'string' && !item.responsibilities && !item.accomplishments && item.description && (
-                        <p className="text-slate-600 leading-relaxed mt-3">
+                        <p className="work-section__fallback">
                           {item.description}
                         </p>
                       )}
@@ -70,7 +71,7 @@ const Work = () => {
                   </div>
                 ))
               ) : (
-                <div className="text-center text-slate-500 py-10">
+                <div className="work-section__empty">
                   <p>No work experience added yet.</p>
                 </div>
               )}

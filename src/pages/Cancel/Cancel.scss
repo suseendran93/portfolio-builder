@@ -1,0 +1,33 @@
+@use "../../styles/tokens" as *;
+
+.cancel-page {
+  @apply min-h-screen bg-slate-50 flex items-center justify-center p-4;
+
+  &__card {
+    @apply max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center;
+  }
+
+  &__icon {
+    @apply inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 mb-6;
+  }
+
+  &__icon-mark {
+    @apply text-red-600;
+  }
+
+  &__title {
+    @apply text-3xl font-bold text-slate-900 mb-2;
+  }
+
+  &__description {
+    @apply text-slate-600 mb-8;
+  }
+
+  &__action {
+    @apply w-full py-4 bg-slate-100 text-slate-900 rounded-xl font-bold transition-all;
+
+    &:hover {
+      @apply bg-slate-200;
+    }
+  }
+}

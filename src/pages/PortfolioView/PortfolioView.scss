@@ -1,0 +1,33 @@
+@use "../../styles/tokens" as *;
+
+.portfolio-view {
+  @apply min-h-screen font-inter transition-colors duration-500;
+
+  &__toolbar {
+    @apply fixed top-24 right-5 z-50 bg-white/90 backdrop-blur-md p-3 rounded-full flex gap-2 shadow-lg border border-slate-200;
+  }
+
+  &__toolbar-button {
+    @apply flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors;
+
+    &--secondary {
+      @apply bg-slate-100 text-slate-700;
+
+      &:hover {
+        @apply bg-slate-200;
+      }
+    }
+
+    &--danger {
+      @apply border border-red-200 text-red-600;
+
+      &:hover {
+        @apply bg-red-50;
+      }
+    }
+  }
+
+  &__footer {
+    @apply bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm;
+  }
+}

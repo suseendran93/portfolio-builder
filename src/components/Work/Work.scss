@@ -1,0 +1,164 @@
+@use "../../styles/tokens" as *;
+
+.work-section {
+  @apply py-20 transition-colors duration-500;
+
+  &--light {
+    @apply bg-white;
+  }
+
+  &--dark {
+    @apply bg-transparent;
+  }
+
+  &__container {
+    @apply container mx-auto px-4;
+  }
+
+  &__shell {
+    @apply flex justify-center;
+  }
+
+  &__content {
+    @apply w-full lg:w-8/12;
+  }
+
+  &__heading {
+    @apply text-center mb-16;
+  }
+
+  &__title {
+    @apply text-3xl font-bold mb-4;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__divider {
+    @apply h-1 w-20 mx-auto rounded-full;
+    background-color: var(--accent-color);
+  }
+
+  &__list {
+    @apply space-y-8;
+  }
+
+  &__item {
+    @apply relative pl-0;
+  }
+
+  &__card {
+    @apply p-8 rounded-2xl border transition-all duration-300;
+
+    &:hover {
+      @apply shadow-lg;
+    }
+
+    &--light {
+      @apply bg-slate-50 border-slate-100;
+
+      &:hover {
+        @apply border-indigo-100;
+      }
+    }
+
+    &--dark {
+      @apply bg-slate-800/50 border-slate-700;
+
+      &:hover {
+        @apply border-slate-600;
+      }
+    }
+  }
+
+  &__meta {
+    @apply flex flex-col md:flex-row md:items-start md:justify-between mb-4;
+  }
+
+  &__identity {
+    @apply flex items-center gap-3 mb-2 md:mb-0;
+  }
+
+  &__icon {
+    @apply p-3 rounded-lg;
+    color: var(--accent-color);
+
+    &--light {
+      @apply bg-indigo-100;
+    }
+
+    &--dark {
+      @apply bg-white/10;
+    }
+  }
+
+  &__company {
+    @apply text-xl font-bold;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__role {
+    @apply font-medium;
+    color: var(--accent-color);
+  }
+
+  &__date {
+    @apply text-sm font-semibold px-3 py-1 rounded-full;
+
+    &--light {
+      @apply text-slate-500 bg-slate-100;
+    }
+
+    &--dark {
+      @apply text-slate-400 bg-slate-700;
+    }
+  }
+
+  &__detail {
+    @apply mt-3;
+  }
+
+  &__detail-title {
+    @apply text-sm font-semibold mb-1;
+
+    &--light {
+      @apply text-slate-700;
+    }
+
+    &--dark {
+      @apply text-slate-300;
+    }
+  }
+
+  &__detail-text {
+    @apply leading-relaxed whitespace-pre-line;
+
+    &--light {
+      @apply text-slate-600;
+    }
+
+    &--dark {
+      @apply text-slate-400;
+    }
+  }
+
+  &__fallback {
+    @apply text-slate-600 leading-relaxed mt-3;
+  }
+
+  &__empty {
+    @apply text-center text-slate-500 py-10;
+  }
+}

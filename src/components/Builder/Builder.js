@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette } from 'react-icons/fa';
 import Customizer from './Customizer';
 import { savePortfolioForUser } from '../../utils/portfolioStorage';
+import './Builder.scss';
 
 // Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
 const formatDateDisplay = (dateStr) => {
@@ -292,51 +293,49 @@ const Builder = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
+        <div className="builder">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center">
-                            <img src={process.env.PUBLIC_URL + "/logo.png"} alt="BuildFolio Logo" className="h-10 w-auto object-contain" />
+            <header className="builder__header">
+                <div className="builder__header-shell">
+                    <div className="builder__header-row">
+                        <div className="builder__brand">
+                            <img
+                                src={process.env.PUBLIC_URL + "/logo.png"}
+                                alt="BuildFolio Logo"
+                                className="builder__brand-logo"
+                            />
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <div className="flex flex-col items-end mr-2">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <div className="builder__toolbar">
+                            <div className="builder__account">
+                                <span className={`builder__tier ${isPremium ? 'builder__tier--premium' : 'builder__tier--basic'}`}>
                                     {isPremium ? (
-                                        <span className="flex items-center gap-1 text-amber-500">
-                                            <FaCrown size={10} /> PREMIUM
-                                        </span>
+                                        <>
+                                            <FaCrown size={10} className="builder__tier-icon" /> PREMIUM
+                                        </>
                                     ) : 'BASIC'}
                                 </span>
-                                <span className="text-xs text-slate-400 hidden md:block">
+                                <span className="builder__account-email">
                                     {currentUser?.email}
                                 </span>
                             </div>
 
-                            <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
+                            <div className="builder__toolbar-divider"></div>
 
                             <button
                                 onClick={handleGeneratePortfolio}
                                 disabled={generating || (!isPremium && false)} // Button is enabled for Basic but triggers modal
-                                className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium ${generating
-                                    ? 'bg-slate-300 cursor-not-allowed'
-                                    : 'bg-emerald-600 hover:bg-emerald-700'
-                                    }`}
+                                className={`builder__action builder__action--publish ${generating ? 'builder__action--disabled' : ''}`}
                                 title={!isPortfolioReady ? "Please complete all required fields" : "Publish to live URL"}
                             >
-                                <FaMagic className={generating ? "animate-spin" : ""} />
+                                <FaMagic className={`builder__action-icon ${generating ? 'builder__action-icon--spinning' : ''}`} />
                                 {generating ? 'Building...' : (isPremium ? 'Publish' : 'Unlock Publish')}
                             </button>
 
                             <button
                                 onClick={handleSaveAll}
                                 disabled={generating}
-                                className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium ${generating
-                                    ? 'bg-slate-300 cursor-not-allowed'
-                                    : 'bg-indigo-600 hover:bg-indigo-700'
-                                    }`}
+                                className={`builder__action builder__action--save ${generating ? 'builder__action--disabled' : ''}`}
                                 title="Save all changes to database"
                             >
                                 <FaCheck />
@@ -345,13 +344,13 @@ const Builder = () => {
 
                             <button
                                 onClick={handlePreview}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                                className="builder__action builder__action--preview"
                                 title="Preview Portfolio"
                             >
-                                <FaEye /> <span className="hidden sm:inline">Preview</span>
+                                <FaEye /> <span className="builder__action-label">Preview</span>
                             </button>
 
-                            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-slate-800 transition-colors text-sm">
+                            <button onClick={handleLogout} className="builder__action builder__action--logout">
                                 <FaSignOutAlt />
                             </button>
                         </div >
@@ -359,11 +358,11 @@ const Builder = () => {
                 </div >
             </header >
 
-            <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <main className="builder__main">
+                <div className="builder__layout">
                     {/* Sidebar Tabs */}
-                    <div className="lg:col-span-3">
-                        <nav className="space-y-1">
+                    <div className="builder__sidebar">
+                        <nav className="builder__nav">
                             {tabs.map(tab => (
                                 <button
                                     key={tab.id}
@@ -371,20 +370,14 @@ const Builder = () => {
                                         setActiveTab(tab.id);
                                         setIsCustomizing(false);
                                     }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all
-                                        ${activeTab === tab.id && !isCustomizing
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                            : 'text-slate-600 hover:bg-white hover:text-indigo-600'}`}
+                                    className={`builder__tab ${activeTab === tab.id && !isCustomizing ? 'builder__tab--active' : ''}`}
                                 >
                                     {tab.icon} {tab.label}
                                 </button>
                             ))}
                             <button
                                 onClick={() => setIsCustomizing(true)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all
-                                    ${isCustomizing
-                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                        : 'text-slate-600 hover:bg-white hover:text-indigo-600'}`}
+                                className={`builder__tab ${isCustomizing ? 'builder__tab--active' : ''}`}
                             >
                                 <FaPalette /> Styling
                             </button>
@@ -392,8 +385,8 @@ const Builder = () => {
                     </div>
 
                     {/* Content Area */}
-                    <div className="lg:col-span-9">
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 min-h-[600px]">
+                    <div className="builder__content-column">
+                        <div className="builder__panel">
                             {isCustomizing ? (
                                 <Customizer
                                     localData={localData}
@@ -408,10 +401,10 @@ const Builder = () => {
                                 <>
                                     {/* Profile Tab */}
                                     {activeTab === 'about' && (
-                                        <div className="space-y-6">
-                                            <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Profile Details</h2>
-                                            <div className="flex-1 space-y-6">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="builder__section">
+                                            <h2 className="builder__section-title builder__section-title--framed">Profile Details</h2>
+                                            <div className="builder__section-body">
+                                                <div className="builder__form-grid">
                                                     <InputGroup
                                                         label="Full Name"
                                                         value={localData.name}
@@ -426,23 +419,22 @@ const Builder = () => {
                                                     />
                                                 </div>
 
-                                                <div className="mb-6">
-                                                    <label className={`block text-sm font-semibold mb-2 ${showAllErrors && fieldErrors.profilePic ? 'text-red-600' : 'text-slate-700'}`}>Profile Picture</label>
-                                                    <div className="flex items-center gap-6">
-                                                        <div className={`w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0
-                                                    ${showAllErrors && fieldErrors.profilePic ? 'border-red-300' : 'border-slate-300'}`}>
+                                                <div className="builder__avatar-field">
+                                                    <label className={`builder-form-field__label ${showAllErrors && fieldErrors.profilePic ? 'builder-form-field__label--error' : ''}`}>Profile Picture</label>
+                                                    <div className="builder__avatar-row">
+                                                        <div className={`builder__avatar-preview ${showAllErrors && fieldErrors.profilePic ? 'builder__avatar-preview--error' : ''}`}>
                                                             {localData.profilePic ? (
-                                                                <img src={localData.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                                                                <img src={localData.profilePic} alt="Profile" className="builder__avatar-image" />
                                                             ) : (
-                                                                <FaImage className="text-slate-400 text-2xl" />
+                                                                <FaImage className="builder__avatar-icon" />
                                                             )}
                                                         </div>
-                                                        <div className="flex-1">
+                                                        <div className="builder__avatar-actions">
                                                             {localData.profilePic ? (
-                                                                <div className="flex flex-col gap-2">
+                                                                <div className="builder__avatar-action-group">
                                                                     <button
                                                                         onClick={() => handleLocalChange('profilePic', null)}
-                                                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-semibold hover:bg-red-100 transition-colors border border-red-100 w-fit"
+                                                                        className="builder__avatar-remove"
                                                                     >
                                                                         <FaTrash size={12} />
                                                                     </button>
@@ -454,13 +446,13 @@ const Builder = () => {
                                                                         type="file"
                                                                         accept="image/*"
                                                                         onChange={handleImageUpload}
-                                                                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                                                        className="builder__file-input"
                                                                     />
-                                                                    <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
+                                                                    <p className="builder__helper-text">Recommended: Square JPG or PNG, max 2MB.</p>
                                                                 </>
                                                             )}
                                                             {showAllErrors && fieldErrors.profilePic && (
-                                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.profilePic}</p>
+                                                                <p className="builder__inline-error">{fieldErrors.profilePic}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -480,35 +472,35 @@ const Builder = () => {
 
                                     {/* Education Tab */}
                                     {activeTab === 'education' && (
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                                <div>
-                                                    <h2 className="text-2xl font-bold text-slate-900">Education</h2>
+                                        <div className="builder__section">
+                                            <div className="builder__section-header">
+                                                <div className="builder__section-heading">
+                                                    <h2 className="builder__section-title">Education</h2>
                                                     {showAllErrors && fieldErrors.education && (
-                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.education}</p>
+                                                        <p className="builder__section-error">{fieldErrors.education}</p>
                                                     )}
                                                 </div>
                                                 <button
                                                     onClick={() => handleLocalChange('education', [...localData.education, { degree: "", school: "", startDate: "", endDate: "", description: "" }])}
-                                                    className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                                                    className="builder__section-add"
                                                 >
                                                     <FaPlus /> Add New
                                                 </button>
                                             </div>
 
                                             {localData.education.map((edu, index) => (
-                                                <div key={index} className="bg-slate-50 rounded-xl p-6 border border-slate-200 relative group">
+                                                <div key={index} className="builder__entry-card">
                                                     <button
                                                         onClick={() => {
                                                             const newEdu = localData.education.filter((_, i) => i !== index);
                                                             handleLocalChange('education', newEdu);
                                                         }}
-                                                        className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors p-2"
+                                                        className="builder__entry-remove"
                                                     >
                                                         <FaTrash size={14} />
                                                     </button>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                    <div className="builder__entry-grid">
                                                         <InputGroup
                                                             label="Degree"
                                                             value={edu.degree || ''}
@@ -529,11 +521,11 @@ const Builder = () => {
                                                             }}
                                                             error={showAllErrors ? (edu.school ? null : "Required") : null}
                                                         />
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
+                                                        <div className="builder-form-field">
+                                                            <label className="builder-form-field__label">Start Date</label>
                                                             <input
                                                                 type="date"
-                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                className="builder-form-field__control"
                                                                 value={edu.startDate || ''}
                                                                 onChange={(e) => {
                                                                     const newEdu = [...localData.education];
@@ -542,11 +534,11 @@ const Builder = () => {
                                                                 }}
                                                             />
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
+                                                        <div className="builder-form-field">
+                                                            <label className="builder-form-field__label">End Date</label>
                                                             <input
                                                                 type="date"
-                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                className="builder-form-field__control"
                                                                 value={edu.endDate || ''}
                                                                 onChange={(e) => {
                                                                     const newEdu = [...localData.education];
@@ -570,35 +562,35 @@ const Builder = () => {
 
                                     {/* Work Tab */}
                                     {activeTab === 'work' && (
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                                <div>
-                                                    <h2 className="text-2xl font-bold text-slate-900">Work Experience</h2>
+                                        <div className="builder__section">
+                                            <div className="builder__section-header">
+                                                <div className="builder__section-heading">
+                                                    <h2 className="builder__section-title">Work Experience</h2>
                                                     {showAllErrors && fieldErrors.work && (
-                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.work}</p>
+                                                        <p className="builder__section-error">{fieldErrors.work}</p>
                                                     )}
                                                 </div>
                                                 <button
                                                     onClick={() => handleLocalChange('work', [...localData.work, { company: "", role: "", startDate: "", endDate: "", responsibilities: "", accomplishments: "" }])}
-                                                    className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                                                    className="builder__section-add"
                                                 >
                                                     <FaPlus /> Add New
                                                 </button>
                                             </div>
 
                                             {localData.work.map((wk, index) => (
-                                                <div key={index} className="bg-slate-50 rounded-xl p-6 border border-slate-200 relative group">
+                                                <div key={index} className="builder__entry-card">
                                                     <button
                                                         onClick={() => {
                                                             const newWork = localData.work.filter((_, i) => i !== index);
                                                             handleLocalChange('work', newWork);
                                                         }}
-                                                        className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors p-2"
+                                                        className="builder__entry-remove"
                                                     >
                                                         <FaTrash size={14} />
                                                     </button>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                    <div className="builder__entry-grid">
                                                         <InputGroup
                                                             label="Company"
                                                             value={wk.company || ''}
@@ -619,11 +611,11 @@ const Builder = () => {
                                                             }}
                                                             error={showAllErrors ? (wk.role ? null : "Required") : null}
                                                         />
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
+                                                        <div className="builder-form-field">
+                                                            <label className="builder-form-field__label">Start Date</label>
                                                             <input
                                                                 type="date"
-                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                className="builder-form-field__control"
                                                                 value={wk.startDate || ''}
                                                                 onChange={(e) => {
                                                                     const newWork = [...localData.work];
@@ -632,11 +624,11 @@ const Builder = () => {
                                                                 }}
                                                             />
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
+                                                        <div className="builder-form-field">
+                                                            <label className="builder-form-field__label">End Date</label>
                                                             <input
                                                                 type="date"
-                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                className="builder-form-field__control"
                                                                 value={wk.endDate || ''}
                                                                 onChange={(e) => {
                                                                     const newWork = [...localData.work];
@@ -667,42 +659,41 @@ const Builder = () => {
 
                                     {/* Skills Tab */}
                                     {activeTab === 'skills' && (
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                                <div>
-                                                    <h2 className="text-2xl font-bold text-slate-900">Skills</h2>
+                                        <div className="builder__section">
+                                            <div className="builder__section-header">
+                                                <div className="builder__section-heading">
+                                                    <h2 className="builder__section-title">Skills</h2>
                                                     {showAllErrors && fieldErrors.skills && (
-                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.skills}</p>
+                                                        <p className="builder__section-error">{fieldErrors.skills}</p>
                                                     )}
                                                 </div>
                                                 <button
                                                     onClick={() => handleLocalChange('skills', [...localData.skills, { name: "New Skill", percent: 50 }])}
-                                                    className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                                                    className="builder__section-add"
                                                 >
                                                     <FaPlus /> Add New
                                                 </button>
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            <div className="builder__skills-grid">
                                                 {localData.skills.map((skill, index) => (
-                                                    <div key={index} className="bg-slate-50 p-4 rounded-xl border border-slate-200 relative">
+                                                    <div key={index} className="builder__skill-card">
                                                         <button
                                                             onClick={() => {
                                                                 const newSkills = localData.skills.filter((_, i) => i !== index);
                                                                 handleLocalChange('skills', newSkills);
                                                             }}
-                                                            className="absolute top-2 right-2 text-slate-400 hover:text-red-500 p-1"
+                                                            className="builder__skill-remove"
                                                         >
                                                             <FaTrash size={12} />
                                                         </button>
 
-                                                        <div className="mt-2 space-y-3">
-                                                            <div>
-                                                                <label className="text-xs font-semibold text-slate-500 uppercase">Skill Name</label>
+                                                        <div className="builder__skill-body">
+                                                            <div className="builder__skill-group">
+                                                                <label className="builder__skill-label">Skill Name</label>
                                                                 <input
                                                                     type="text"
-                                                                    className={`w-full bg-white border rounded px-2 py-1 text-sm mt-1 focus:ring-1 focus:ring-indigo-500 outline-none
-                                                                ${showAllErrors && !skill.name?.trim() ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300'}`}
+                                                                    className={`builder__skill-input ${showAllErrors && !skill.name?.trim() ? 'builder__skill-input--error' : ''}`}
                                                                     value={skill.name || ''}
                                                                     onChange={(e) => {
                                                                         const newSkills = [...localData.skills];
@@ -711,18 +702,18 @@ const Builder = () => {
                                                                     }}
                                                                 />
                                                                 {showAllErrors && !skill.name?.trim() && (
-                                                                    <p className="text-red-500 text-[10px] mt-0.5">Required</p>
+                                                                    <p className="builder__skill-error">Required</p>
                                                                 )}
                                                             </div>
-                                                            <div>
-                                                                <label className="text-xs font-semibold text-slate-500 uppercase flex justify-between">
+                                                            <div className="builder__skill-group">
+                                                                <label className="builder__skill-label-row">
                                                                     <span>Proficiency</span>
                                                                     <span>{skill.percent}%</span>
                                                                 </label>
                                                                 <input
                                                                     type="range"
                                                                     min="0" max="100"
-                                                                    className="w-full mt-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                                                    className="builder__skill-range"
                                                                     value={skill.percent || 0}
                                                                     onChange={(e) => {
                                                                         const newSkills = [...localData.skills];
@@ -740,10 +731,10 @@ const Builder = () => {
 
                                     {/* Contact Tab */}
                                     {activeTab === 'contact' && (
-                                        <div className="space-y-6">
-                                            <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Contact Information</h2>
+                                        <div className="builder__section">
+                                            <h2 className="builder__section-title builder__section-title--framed">Contact Information</h2>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="builder__form-grid">
                                                 <InputGroup
                                                     label="Phone Number"
                                                     value={localData.contact.phone || ''}
@@ -761,10 +752,10 @@ const Builder = () => {
                                                 <InputGroup label="GitHub URL" value={localData.contact.github || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })} />
                                             </div>
 
-                                            <div className="mt-12 flex justify-end">
+                                            <div className="builder__panel-footer">
                                                 <button
                                                     onClick={() => setIsCustomizing(true)}
-                                                    className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                                                    className="builder__next-action"
                                                 >
                                                     Next: Customize Style <FaPalette />
                                                 </button>
@@ -782,29 +773,29 @@ const Builder = () => {
             {/* Generated URL Modal */}
             {
                 showModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100">
-                            <div className="flex justify-between items-start mb-4">
-                                <h3 className="text-xl font-bold text-slate-900">🚀 Portfolio Published!</h3>
-                                <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
+                    <div className="builder-modal">
+                        <div className="builder-modal__dialog">
+                            <div className="builder-modal__header">
+                                <h3 className="builder-modal__title">🚀 Portfolio Published!</h3>
+                                <button onClick={() => setShowModal(false)} className="builder-modal__close">
                                     <FaTimes />
                                 </button>
                             </div>
 
-                            <p className="text-slate-600 mb-6">
+                            <p className="builder-modal__text">
                                 Your portfolio is now live and ready to share with the world.
                             </p>
 
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 break-all">
-                                <a href={generatedUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline font-medium text-sm">
+                            <div className="builder-modal__link-card">
+                                <a href={generatedUrl} target="_blank" rel="noopener noreferrer" className="builder-modal__link">
                                     {generatedUrl}
                                 </a>
                             </div>
 
-                            <div className="flex gap-3">
+                            <div className="builder-modal__actions">
                                 <button
                                     onClick={() => setShowModal(false)}
-                                    className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                                    className="builder-modal__button builder-modal__button--secondary"
                                 >
                                     Close
                                 </button>
@@ -813,7 +804,7 @@ const Builder = () => {
                                         navigator.clipboard.writeText(generatedUrl);
                                         toast.success("Link copied!");
                                     }}
-                                    className="flex-1 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                                    className="builder-modal__button builder-modal__button--primary"
                                 >
                                     <FaCopy /> Copy Link
                                 </button>
@@ -826,48 +817,48 @@ const Builder = () => {
             {/* Upgrade to Premium Modal */}
             {
                 showUpgradeModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-0 overflow-hidden transform transition-all scale-100">
-                            <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-6 text-white text-center relative">
-                                <button onClick={() => setShowUpgradeModal(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
+                    <div className="builder-modal">
+                        <div className="builder-modal__dialog builder-modal__dialog--upgrade">
+                            <div className="builder-modal__hero">
+                                <button onClick={() => setShowUpgradeModal(false)} className="builder-modal__hero-close">
                                     <FaTimes />
                                 </button>
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 mb-4">
+                                <div className="builder-modal__hero-icon">
                                     <FaCrown size={32} />
                                 </div>
-                                <h3 className="text-2xl font-bold">Upgrade to Premium</h3>
-                                <p className="text-white/80 mt-1">Unlock the full power of BuildFolio</p>
+                                <h3 className="builder-modal__hero-title">Upgrade to Premium</h3>
+                                <p className="builder-modal__hero-subtitle">Unlock the full power of BuildFolio</p>
                             </div>
 
-                            <div className="p-6 space-y-4">
-                                <div className="space-y-3">
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
-                                        <p className="text-sm font-medium text-slate-700">Publish your portfolio to a live link</p>
+                            <div className="builder-modal__content">
+                                <div className="builder-modal__feature-list">
+                                    <div className="builder-modal__feature">
+                                        <div className="builder-modal__feature-icon"><FaCheck className="builder-modal__feature-check" size={10} /></div>
+                                        <p className="builder-modal__feature-text">Publish your portfolio to a live link</p>
                                     </div>
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
-                                        <p className="text-sm font-medium text-slate-700">Remove 'DRAFT' watermark from resumes</p>
+                                    <div className="builder-modal__feature">
+                                        <div className="builder-modal__feature-icon"><FaCheck className="builder-modal__feature-check" size={10} /></div>
+                                        <p className="builder-modal__feature-text">Remove 'DRAFT' watermark from resumes</p>
                                     </div>
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-1 bg-emerald-100 p-1 rounded-full"><FaCheck className="text-emerald-600" size={10} /></div>
-                                        <p className="text-sm font-medium text-slate-700">Custom subdomains (coming soon)</p>
+                                    <div className="builder-modal__feature">
+                                        <div className="builder-modal__feature-icon"><FaCheck className="builder-modal__feature-check" size={10} /></div>
+                                        <p className="builder-modal__feature-text">Custom subdomains (coming soon)</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                                    <span className="text-4xl font-bold text-slate-900">$9</span>
-                                    <span className="text-slate-500 ml-1 font-medium">one-time</span>
+                                <div className="builder-modal__price-card">
+                                    <span className="builder-modal__price-value">$9</span>
+                                    <span className="builder-modal__price-label">one-time</span>
                                 </div>
 
                                 <button
                                     onClick={handleUpgradeToPremium}
-                                    className="w-full py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl font-bold hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                                    className="builder-modal__upgrade-button"
                                 >
                                     Upgrade Now
                                 </button>
 
-                                <p className="text-center text-xs text-slate-400">
+                                <p className="builder-modal__secure-note">
                                     🔒 Secure payment via Stripe
                                 </p>
                             </div>
@@ -881,13 +872,12 @@ const Builder = () => {
 
 // UI Components Helpers
 const InputGroup = ({ label, value, onChange, type = "text", placeholder = "", as = "input", rows, error }) => (
-    <div className="mb-4">
-        <label className={`block text-sm font-semibold mb-2 ${error ? 'text-red-600' : 'text-slate-700'}`}>{label}</label>
+    <div className="builder-form-field">
+        <label className={`builder-form-field__label ${error ? 'builder-form-field__label--error' : ''}`}>{label}</label>
         {as === "textarea" ? (
             <textarea
                 rows={rows || 4}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-slate-900 bg-white
-                    ${error ? 'border-red-500 focus:ring-red-200' : 'border-slate-300 focus:ring-indigo-500'}`}
+                className={`builder-form-field__control builder-form-field__control--textarea ${error ? 'builder-form-field__control--error' : ''}`}
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
@@ -895,15 +885,14 @@ const InputGroup = ({ label, value, onChange, type = "text", placeholder = "", a
         ) : (
             <input
                 type={type}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-slate-900 bg-white
-                    ${error ? 'border-red-500 focus:ring-red-200' : 'border-slate-300 focus:ring-indigo-500'}`}
+                className={`builder-form-field__control ${error ? 'builder-form-field__control--error' : ''}`}
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
             />
         )}
-        {error && <p className="text-red-500 text-xs mt-1.5 font-medium flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-red-500"></span>
+        {error && <p className="builder-form-field__error">
+            <span className="builder-form-field__error-dot"></span>
             {error}
         </p>}
     </div>

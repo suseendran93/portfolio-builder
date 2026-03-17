@@ -1,0 +1,115 @@
+@use "../../styles/tokens" as *;
+
+.contact-section {
+  @apply py-20 transition-colors duration-500;
+
+  &--light {
+    @apply bg-white;
+  }
+
+  &--dark {
+    @apply bg-transparent;
+  }
+
+  &__container {
+    @apply container mx-auto px-4;
+  }
+
+  &__heading {
+    @apply text-center mb-16;
+  }
+
+  &__title {
+    @apply text-3xl font-bold mb-4;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__divider {
+    @apply h-1 w-20 mx-auto rounded-full;
+    background-color: var(--accent-color);
+  }
+
+  &__subtitle {
+    @apply mt-4 max-w-xl mx-auto;
+
+    &--light {
+      @apply text-slate-600;
+    }
+
+    &--dark {
+      @apply text-slate-400;
+    }
+  }
+
+  &__shell {
+    @apply flex justify-center;
+  }
+
+  &__content {
+    @apply w-full lg:w-10/12;
+  }
+
+  &__grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  &__card {
+    @apply flex flex-col items-center p-6 border rounded-xl transition-all duration-300;
+
+    &:hover {
+      @apply shadow-lg;
+      transform: translateY(-0.25rem);
+    }
+
+    &--light {
+      @apply bg-slate-50 border-slate-100;
+
+      &:hover {
+        @apply border-indigo-100;
+      }
+    }
+
+    &--dark {
+      @apply bg-slate-800/50 border-slate-700;
+
+      &:hover {
+        @apply border-slate-600;
+      }
+    }
+  }
+
+  &__icon {
+    @apply w-16 h-16 flex items-center justify-center rounded-full shadow-sm transition-colors mb-4;
+
+    &--light {
+      @apply bg-white text-slate-700;
+    }
+
+    &--dark {
+      @apply bg-slate-700 text-slate-300;
+    }
+  }
+
+  &__link {
+    @apply text-inherit w-full h-full flex items-center justify-center transition-colors;
+  }
+
+  &__label {
+    @apply font-medium break-all text-center;
+
+    &--light {
+      @apply text-slate-600;
+    }
+
+    &--dark {
+      @apply text-slate-400;
+    }
+  }
+}

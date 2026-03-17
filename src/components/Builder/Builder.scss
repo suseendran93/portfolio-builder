@@ -1,0 +1,704 @@
+@use "../../styles/tokens" as *;
+
+.builder {
+  min-height: $size-full-viewport;
+  display: flex;
+  flex-direction: column;
+  background-color: $color-page-background;
+
+  &__header {
+    @apply sticky top-0;
+    z-index: $z-content;
+    border-bottom: 1px solid $color-border-soft;
+    background-color: $color-surface-soft;
+    backdrop-filter: blur($space-4);
+  }
+
+  &__header-shell,
+  &__main {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  &__header-row {
+    @apply flex items-center justify-between gap-4;
+    min-height: $space-12 + $space-4;
+  }
+
+  &__brand {
+    @apply flex items-center;
+  }
+
+  &__brand-logo {
+    height: $space-10;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__toolbar {
+    @apply flex items-center gap-3;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  &__account {
+    @apply flex flex-col items-end;
+    margin-right: $space-2;
+  }
+
+  &__tier {
+    @apply flex items-center gap-1 text-xs font-bold uppercase tracking-widest;
+
+    &--basic {
+      color: $color-text-secondary;
+    }
+
+    &--premium {
+      color: #f59e0b;
+    }
+  }
+
+  &__tier-icon {
+    flex-shrink: 0;
+  }
+
+  &__account-email {
+    @apply text-xs;
+    color: $color-text-secondary;
+  }
+
+  &__toolbar-divider {
+    @apply hidden md:block;
+    width: 1px;
+    height: $space-6;
+    background-color: $color-border-soft;
+  }
+
+  &__action {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium;
+    min-height: $space-10;
+    padding: $space-2 $space-4;
+    border: 1px solid transparent;
+
+    &--publish,
+    &--save {
+      color: $color-text-inverse;
+      box-shadow: $shadow-floating;
+    }
+
+    &--publish {
+      background-color: #059669;
+
+      &:hover {
+        background-color: #047857;
+      }
+    }
+
+    &--save {
+      background-color: $color-brand-primary;
+
+      &:hover {
+        background-color: #4338ca;
+      }
+    }
+
+    &--preview {
+      background-color: $color-brand-highlight;
+      color: $color-brand-primary;
+
+      &:hover {
+        background-color: $color-brand-primary-soft;
+      }
+    }
+
+    &--logout {
+      color: $color-text-secondary;
+
+      &:hover {
+        color: $color-text-primary;
+      }
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      background-color: #cbd5e1;
+      box-shadow: none;
+    }
+  }
+
+  &__action-icon--spinning {
+    animation: builder-spin $duration-medium linear infinite;
+  }
+
+  &__action-label {
+    @apply hidden sm:inline;
+  }
+
+  &__main {
+    @apply flex-1 py-8;
+  }
+
+  &__layout {
+    @apply grid grid-cols-1 lg:grid-cols-12 gap-8;
+  }
+
+  &__sidebar {
+    @apply lg:col-span-3;
+  }
+
+  &__nav {
+    @apply flex flex-col gap-1;
+  }
+
+  &__tab {
+    @apply flex w-full items-center gap-3 rounded-xl text-sm font-medium;
+    padding: $space-3 $space-4;
+    color: $color-text-secondary;
+    background-color: transparent;
+
+    &:hover {
+      background-color: $color-surface;
+      color: $color-brand-primary;
+      box-shadow: $shadow-floating;
+    }
+
+    &--active {
+      color: $color-text-inverse;
+      background-color: $color-brand-primary;
+      box-shadow: 0 0.75rem 2rem $color-brand-primary-soft;
+    }
+  }
+
+  &__content-column {
+    @apply lg:col-span-9;
+    min-width: $space-0;
+  }
+
+  &__panel {
+    min-height: calc(#{$size-full-viewport} - #{$space-12 * 2});
+    border: 1px solid $color-border-soft;
+    border-radius: $radius-xl;
+    background-color: $color-surface;
+    box-shadow: $shadow-floating;
+    padding: $space-6;
+  }
+
+  &__section,
+  &__section-body {
+    @apply flex flex-col gap-6;
+  }
+
+  &__section-header {
+    @apply flex items-start justify-between gap-4;
+    padding-bottom: $space-4;
+    margin-bottom: $space-6;
+    border-bottom: 1px solid $color-border-soft;
+  }
+
+  &__section-heading {
+    @apply flex flex-col;
+  }
+
+  &__section-title {
+    @apply text-2xl font-bold;
+    color: $color-text-primary;
+
+    &--framed {
+      padding-bottom: $space-4;
+      margin-bottom: $space-6;
+      border-bottom: 1px solid $color-border-soft;
+    }
+  }
+
+  &__section-error,
+  &__inline-error,
+  &__skill-error {
+    @apply text-xs font-medium;
+    color: #ef4444;
+  }
+
+  &__section-add {
+    @apply inline-flex items-center gap-2 text-sm font-medium;
+    color: $color-brand-primary;
+
+    &:hover {
+      color: #4338ca;
+    }
+  }
+
+  &__form-grid,
+  &__entry-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+
+  &__entry-grid {
+    margin-bottom: $space-4;
+  }
+
+  &__avatar-field {
+    margin-bottom: $space-6;
+  }
+
+  &__avatar-row {
+    @apply flex items-center gap-6;
+  }
+
+  &__avatar-preview {
+    @apply flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed;
+    width: $space-12 * 2;
+    height: $space-12 * 2;
+    background-color: $color-page-background;
+    border-color: #cbd5e1;
+
+    &--error {
+      border-color: #fca5a5;
+    }
+  }
+
+  &__avatar-image {
+    width: $size-full;
+    height: $size-full;
+    object-fit: cover;
+  }
+
+  &__avatar-icon {
+    font-size: $space-8;
+    color: $color-text-secondary;
+  }
+
+  &__avatar-actions {
+    @apply flex-1;
+  }
+
+  &__avatar-action-group {
+    @apply flex flex-col gap-2;
+  }
+
+  &__avatar-remove {
+    @apply inline-flex w-fit items-center gap-2 rounded-full text-sm font-semibold;
+    padding: $space-2 $space-4;
+    color: #dc2626;
+    background-color: #fef2f2;
+    border: 1px solid #fee2e2;
+
+    &:hover {
+      background-color: #fee2e2;
+    }
+  }
+
+  &__file-input {
+    @apply block w-full text-sm;
+    color: $color-text-secondary;
+
+    &::file-selector-button {
+      margin-right: $space-4;
+      padding: $space-2 $space-4;
+      border: none;
+      border-radius: $radius-pill;
+      background-color: $color-brand-highlight;
+      color: $color-brand-primary;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    &::file-selector-button:hover {
+      background-color: $color-brand-primary-soft;
+    }
+  }
+
+  &__helper-text {
+    @apply text-xs;
+    margin-top: $space-1;
+    color: $color-text-secondary;
+  }
+
+  &__entry-card,
+  &__skill-card {
+    position: relative;
+    border: 1px solid $color-border-soft;
+    border-radius: $radius-lg;
+    background-color: rgba(248, 250, 252, 0.92);
+  }
+
+  &__entry-card {
+    padding: $space-6;
+  }
+
+  &__entry-remove,
+  &__skill-remove {
+    @apply absolute;
+    color: $color-text-secondary;
+
+    &:hover {
+      color: #ef4444;
+    }
+  }
+
+  &__entry-remove {
+    top: $space-4;
+    right: $space-4;
+    padding: $space-2;
+  }
+
+  &__skills-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+
+  &__skill-card {
+    padding: $space-4;
+  }
+
+  &__skill-remove {
+    top: $space-2;
+    right: $space-2;
+    padding: $space-1;
+  }
+
+  &__skill-body {
+    @apply flex flex-col gap-3;
+    margin-top: $space-2;
+  }
+
+  &__skill-group {
+    @apply flex flex-col;
+  }
+
+  &__skill-label,
+  &__skill-label-row {
+    @apply text-xs font-semibold uppercase;
+    color: $color-text-secondary;
+  }
+
+  &__skill-label-row {
+    @apply flex items-center justify-between;
+  }
+
+  &__skill-input {
+    @apply w-full rounded bg-white text-sm;
+    margin-top: $space-1;
+    padding: $space-1 $space-2;
+    border: 1px solid #cbd5e1;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 1px $color-brand-primary;
+    }
+
+    &--error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 1px #ef4444;
+    }
+  }
+
+  &__skill-range {
+    @apply w-full cursor-pointer appearance-none rounded-lg;
+    margin-top: $space-1;
+    height: $space-2;
+    background-color: #e2e8f0;
+    accent-color: $color-brand-primary;
+  }
+
+  &__panel-footer {
+    @apply flex justify-end;
+    margin-top: $space-12;
+  }
+
+  &__next-action {
+    @apply inline-flex items-center gap-2 rounded-xl font-bold;
+    padding: $space-3 $space-8;
+    color: $color-text-inverse;
+    background-color: $color-brand-primary;
+    box-shadow: 0 0.75rem 2rem $color-brand-primary-soft;
+
+    &:hover {
+      background-color: #4338ca;
+    }
+  }
+}
+
+.builder-form-field {
+  margin-bottom: $space-4;
+
+  &__label {
+    @apply block text-sm font-semibold;
+    margin-bottom: $space-2;
+    color: #334155;
+
+    &--error {
+      color: #dc2626;
+    }
+  }
+
+  &__control {
+    @apply w-full rounded-lg;
+    padding: $space-2 $space-4;
+    border: 1px solid #cbd5e1;
+    background-color: $color-surface;
+    color: $color-text-primary;
+
+    &:focus {
+      outline: none;
+      border-color: transparent;
+      box-shadow: 0 0 0 2px $color-brand-primary-glow;
+    }
+
+    &--textarea {
+      resize: vertical;
+    }
+
+    &--error {
+      border-color: #ef4444;
+
+      &:focus {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+      }
+    }
+  }
+
+  &__error {
+    @apply flex items-center gap-1.5 text-xs font-medium;
+    margin-top: $space-2 - $space-1;
+    color: #ef4444;
+  }
+
+  &__error-dot {
+    width: $space-1;
+    height: $space-1;
+    border-radius: $radius-pill;
+    background-color: #ef4444;
+  }
+}
+
+.builder-modal {
+  @apply fixed inset-0 flex items-center justify-center p-4;
+  z-index: $z-floating;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur($space-1);
+
+  &__dialog {
+    @apply w-full max-w-md;
+    border-radius: $radius-xl;
+    background-color: $color-surface;
+    box-shadow: 0 1.5rem 3rem $color-shadow-strong;
+    padding: $space-6;
+
+    &--upgrade {
+      overflow: hidden;
+      padding: $space-0;
+    }
+  }
+
+  &__header {
+    @apply flex items-start justify-between;
+    margin-bottom: $space-4;
+  }
+
+  &__title {
+    @apply text-xl font-bold;
+    color: $color-text-primary;
+  }
+
+  &__close,
+  &__hero-close {
+    color: $color-text-secondary;
+
+    &:hover {
+      color: $color-text-primary;
+    }
+  }
+
+  &__text {
+    margin-bottom: $space-6;
+    color: $color-text-secondary;
+  }
+
+  &__link-card {
+    @apply break-all rounded-xl;
+    margin-bottom: $space-6;
+    padding: $space-4;
+    border: 1px solid $color-border-soft;
+    background-color: $color-page-background;
+  }
+
+  &__link {
+    @apply text-sm font-medium;
+    color: $color-brand-primary;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__actions {
+    @apply flex gap-3;
+  }
+
+  &__button {
+    @apply flex flex-1 items-center justify-center gap-2 rounded-lg font-medium;
+    min-height: $space-10;
+    padding: $space-2 $space-4;
+    border: 1px solid transparent;
+
+    &--secondary {
+      border-color: #cbd5e1;
+      color: #334155;
+
+      &:hover {
+        background-color: $color-page-background;
+      }
+    }
+
+    &--primary {
+      background-color: $color-brand-primary;
+      color: $color-text-inverse;
+
+      &:hover {
+        background-color: #4338ca;
+      }
+    }
+  }
+
+  &__hero {
+    position: relative;
+    padding: $space-6;
+    text-align: center;
+    color: $color-text-inverse;
+    background: linear-gradient(90deg, #f59e0b 0%, #ea580c 100%);
+  }
+
+  &__hero-close {
+    @apply absolute;
+    top: $space-4;
+    right: $space-4;
+    color: rgba(255, 255, 255, 0.8);
+
+    &:hover {
+      color: $color-white;
+    }
+  }
+
+  &__hero-icon {
+    @apply inline-flex items-center justify-center rounded-full;
+    width: $space-8 * 2;
+    height: $space-8 * 2;
+    margin-bottom: $space-4;
+    background-color: $color-white-soft;
+  }
+
+  &__hero-title {
+    @apply text-2xl font-bold;
+  }
+
+  &__hero-subtitle {
+    margin-top: $space-1;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  &__content {
+    @apply flex flex-col gap-4;
+    padding: $space-6;
+  }
+
+  &__feature-list {
+    @apply flex flex-col gap-3;
+  }
+
+  &__feature {
+    @apply flex items-start gap-3;
+  }
+
+  &__feature-icon {
+    @apply flex items-center justify-center rounded-full;
+    margin-top: $space-1;
+    padding: $space-1;
+    background-color: #dcfce7;
+  }
+
+  &__feature-check {
+    color: #059669;
+  }
+
+  &__feature-text {
+    @apply text-sm font-medium;
+    color: #334155;
+  }
+
+  &__price-card {
+    @apply rounded-xl text-center;
+    padding: $space-4;
+    border: 1px solid rgba(241, 245, 249, 0.96);
+    background-color: $color-page-background;
+  }
+
+  &__price-value {
+    @apply text-4xl font-bold;
+    color: $color-text-primary;
+  }
+
+  &__price-label {
+    margin-left: $space-1;
+    font-weight: 500;
+    color: $color-text-secondary;
+  }
+
+  &__upgrade-button {
+    @apply w-full rounded-xl font-bold;
+    min-height: $space-12 + $space-1;
+    color: $color-text-inverse;
+    background: linear-gradient(90deg, $color-page-background-dark 0%, #1e293b 100%);
+
+    &:hover {
+      box-shadow: $shadow-floating-hover;
+      transform: translateY(-$space-1 * 0.125);
+    }
+  }
+
+  &__secure-note {
+    @apply text-center text-xs;
+    color: #94a3b8;
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .builder {
+    &__account-email,
+    &__toolbar-divider,
+    &__action-label {
+      display: none;
+    }
+
+    &__header-row,
+    &__toolbar,
+    &__avatar-row,
+    &__section-header,
+    &__panel-footer,
+    .builder-modal__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__header-row {
+      padding-top: $space-4;
+      padding-bottom: $space-4;
+    }
+
+    &__panel {
+      padding: $space-4;
+    }
+
+    &__next-action,
+    &__action,
+    .builder-modal__button {
+      width: $size-full;
+    }
+  }
+}
+
+@keyframes builder-spin {
+  from {
+    transform: rotate($space-0);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

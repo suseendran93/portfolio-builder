@@ -1,0 +1,39 @@
+@use "../styles/tokens" as *;
+
+@import url("#{$font-import-inter}");
+@import url("#{$font-import-mono}");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    margin: $space-0;
+    min-height: $size-full-viewport;
+    font-family: $font-family-sans;
+    background-color: $color-page-background;
+    color: $color-text-primary;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: $size-full-viewport;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  ::selection {
+    background: $color-selection;
+    color: inherit;
+  }
+}

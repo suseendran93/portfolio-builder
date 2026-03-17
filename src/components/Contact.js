@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { FaMobileAlt, FaEnvelope, FaLinkedin, FaGithub } from "react-icons/fa";
+import "./Contact/Contact.scss";
 
 const Contact = () => {
   const { portfolioData } = useContext(PortfolioContext);
@@ -34,24 +35,24 @@ const Contact = () => {
   if (contactItems.length === 0) return null;
 
   return (
-    <div className={`py-20 transition-colors duration-500 ${isDark ? 'bg-transparent' : 'bg-white'}`}>
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Get In Touch</h2>
-          <div className="h-1 w-20 mx-auto rounded-full" style={{ backgroundColor: accentColor }}></div>
-          <p className={`mt-4 max-w-xl mx-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+    <div className={`contact-section ${isDark ? 'contact-section--dark' : 'contact-section--light'}`} style={{ "--accent-color": accentColor }}>
+      <div className="contact-section__container">
+        <div className="contact-section__heading">
+          <h2 className={`contact-section__title ${isDark ? 'contact-section__title--dark' : 'contact-section__title--light'}`}>Get In Touch</h2>
+          <div className="contact-section__divider"></div>
+          <p className={`contact-section__subtitle ${isDark ? 'contact-section__subtitle--dark' : 'contact-section__subtitle--light'}`}>
             Feel free to reach out for collaborations or just a friendly hello.
           </p>
         </div>
 
-        <div className="flex justify-center">
-          <div className="w-full lg:w-10/12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="contact-section__shell">
+          <div className="contact-section__content">
+            <div className="contact-section__grid">
               {contactItems.map((item, index) => (
-                <div key={index} className={`flex flex-col items-center p-6 border rounded-xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group ${isDark ? 'bg-slate-800/50 border-slate-700 hover:border-slate-600' : 'bg-slate-50 border-slate-100 hover:border-indigo-100'
+                <div key={index} className={`contact-section__card ${isDark ? 'contact-section__card--dark' : 'contact-section__card--light'
                   }`}>
                   <div
-                    className={`w-16 h-16 flex items-center justify-center rounded-full shadow-sm transition-colors mb-4 ${isDark ? 'bg-slate-700 text-slate-300 group-hover:bg-slate-600' : 'bg-white text-slate-700 group-hover:bg-indigo-50'
+                    className={`contact-section__icon ${isDark ? 'contact-section__icon--dark' : 'contact-section__icon--light'
                       }`}
                     style={{ color: item.href ? undefined : accentColor }}
                   >
@@ -60,7 +61,7 @@ const Contact = () => {
                         href={item.href}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-inherit hover:text-inherit w-full h-full flex items-center justify-center transition-colors"
+                        className="contact-section__link"
                         style={{ color: accentColor }}
                       >
                         {item.icon}
@@ -69,7 +70,7 @@ const Contact = () => {
                       item.icon
                     )}
                   </div>
-                  <span className={`font-medium break-all text-center ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                  <span className={`contact-section__label ${isDark ? 'contact-section__label--dark' : 'contact-section__label--light'}`}>
                     {item.desc}
                   </span>
                 </div>

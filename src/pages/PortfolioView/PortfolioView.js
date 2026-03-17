@@ -1,16 +1,17 @@
 import React, { useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PortfolioContext } from "../context/PortfolioContext";
-import NavbarHeader from "../components/Navbar/Navbar";
-import BackToTop from "../components/BackToTop/BackToTop";
-import Hero from "../components/Hero";
-import Skills from "../components/Skills";
-import Work from "../components/Work";
-import Contact from "../components/Contact";
-import Education from "../components/Education";
-import ResumeDownload from "../components/ResumeDownload/ResumeDownload";
-import { useAuth } from "../context/AuthContext";
+import { PortfolioContext } from "../../context/PortfolioContext";
+import NavbarHeader from "../../components/Navbar/Navbar";
+import BackToTop from "../../components/BackToTop/BackToTop";
+import Hero from "../../components/Hero";
+import Skills from "../../components/Skills";
+import Work from "../../components/Work";
+import Contact from "../../components/Contact";
+import Education from "../../components/Education";
+import ResumeDownload from "../../components/ResumeDownload/ResumeDownload";
+import { useAuth } from "../../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
+import './PortfolioView.scss';
 
 const PortfolioView = ({ publicMode = false }) => {
     const { userData, logout } = useAuth();
@@ -45,12 +46,12 @@ const PortfolioView = ({ publicMode = false }) => {
     };
 
     return (
-        <div className={`min-h-screen font-inter transition-colors duration-500 ${getThemeClasses()}`}>
+        <div className={`portfolio-view ${getThemeClasses()}`}>
             {!publicMode && (
-                <div className="fixed top-24 right-5 z-50 bg-white/90 backdrop-blur-md p-3 rounded-full flex gap-2 shadow-lg border border-slate-200">
+                <div className="portfolio-view__toolbar">
                     <button
                         onClick={() => navigate('/builder')}
-                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-medium transition-colors"
+                        className="portfolio-view__toolbar-button portfolio-view__toolbar-button--secondary"
                     >
                         <FaArrowLeft /> Back to Builder
                     </button>
@@ -64,7 +65,7 @@ const PortfolioView = ({ publicMode = false }) => {
                                 alert("Failed to log out: " + error.message);
                             }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-full text-sm font-medium transition-colors"
+                        className="portfolio-view__toolbar-button portfolio-view__toolbar-button--danger"
                     >
                         <FaSignOutAlt /> Logout
                     </button>
@@ -102,7 +103,7 @@ const PortfolioView = ({ publicMode = false }) => {
                 <Contact />
             </div>
 
-            <footer className="bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm">
+            <footer className="portfolio-view__footer">
                 <div>
                     &copy; {new Date().getFullYear()} Copyright: {portfolioData?.name || "BuildFolio"}
                 </div>

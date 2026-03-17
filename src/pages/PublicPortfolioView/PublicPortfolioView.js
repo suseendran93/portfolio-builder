@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { PortfolioContext } from '../context/PortfolioContext';
-import PortfolioView from './PortfolioView';
-import { loadPublicPortfolioBySlug } from '../utils/portfolioStorage';
+import { PortfolioContext } from '../../context/PortfolioContext';
+import PortfolioView from '../PortfolioView/PortfolioView';
+import { loadPublicPortfolioBySlug } from '../../utils/portfolioStorage';
+import './PublicPortfolioView.scss';
 
 const PublicPortfolioView = () => {
     const { slug } = useParams();
@@ -45,18 +46,18 @@ const PublicPortfolioView = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            <div className="public-portfolio-view public-portfolio-view--loading">
+                <div className="public-portfolio-view__spinner"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-                <div className="bg-red-50 text-red-600 p-6 rounded-lg max-w-md w-full text-center border border-red-200 shadow-md">
-                    <p className="font-semibold text-lg mb-2">Error</p>
-                    <p>{error}</p>
+            <div className="public-portfolio-view public-portfolio-view--error">
+                <div className="public-portfolio-view__error-card">
+                    <p className="public-portfolio-view__error-title">Error</p>
+                    <p className="public-portfolio-view__error-text">{error}</p>
                 </div>
             </div>
         );

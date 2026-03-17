@@ -1,0 +1,11 @@
+@use "../styles/tokens" as *;
+
+* {
+  transition: $transition-global;
+}
+
+.app-shell {
+  min-height: $size-full-viewport;
+  background-color: $color-page-background;
+  color: $color-text-primary;
+}

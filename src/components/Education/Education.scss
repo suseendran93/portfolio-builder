@@ -1,0 +1,120 @@
+@use "../../styles/tokens" as *;
+
+.education-section {
+  @apply py-20 transition-colors duration-500;
+
+  &--light {
+    @apply bg-slate-50;
+  }
+
+  &--dark {
+    @apply bg-transparent;
+  }
+
+  &__container {
+    @apply container mx-auto px-4;
+  }
+
+  &__shell {
+    @apply flex justify-center;
+  }
+
+  &__content {
+    @apply w-full lg:w-8/12;
+  }
+
+  &__heading {
+    @apply text-center mb-16;
+  }
+
+  &__title {
+    @apply text-3xl font-bold mb-4;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__divider {
+    @apply h-1 w-20 mx-auto rounded-full;
+    background-color: var(--accent-color);
+  }
+
+  &__list {
+    @apply space-y-6;
+  }
+
+  &__card {
+    @apply p-8 rounded-2xl shadow-sm border transition-all duration-300;
+
+    &:hover {
+      @apply shadow-md;
+    }
+
+    &--light {
+      @apply bg-white border-slate-200;
+    }
+
+    &--dark {
+      @apply bg-slate-800/50 border-slate-700;
+    }
+  }
+
+  &__card-layout {
+    @apply flex items-start gap-4;
+  }
+
+  &__icon {
+    @apply p-3 rounded-lg mt-1;
+    color: var(--accent-color);
+
+    &--light {
+      @apply bg-indigo-50;
+    }
+
+    &--dark {
+      @apply bg-white/10;
+    }
+  }
+
+  &__details {
+    @apply flex-1;
+  }
+
+  &__meta {
+    @apply flex flex-col md:flex-row md:justify-between md:items-start mb-2;
+  }
+
+  &__school {
+    @apply text-xl font-bold;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__degree {
+    @apply font-medium;
+    color: var(--accent-color);
+  }
+
+  &__date {
+    @apply text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full mt-2 md:mt-0 inline-block text-center w-fit;
+  }
+
+  &__description {
+    @apply text-slate-600 mt-3 leading-relaxed border-t border-slate-100 pt-3;
+  }
+
+  &__empty {
+    @apply text-center text-slate-500 py-10;
+  }
+}

@@ -1,0 +1,114 @@
+@use "../../styles/tokens" as *;
+
+.skills-section {
+  @apply py-20 transition-colors duration-500;
+
+  &--light {
+    @apply bg-slate-50;
+  }
+
+  &--dark {
+    @apply bg-transparent;
+  }
+
+  &__container {
+    @apply container mx-auto px-4;
+  }
+
+  &__shell {
+    @apply flex justify-center;
+  }
+
+  &__content {
+    @apply w-full lg:w-10/12;
+  }
+
+  &__panel {
+    @apply rounded-2xl shadow-sm border p-8 md:p-12 transition-colors duration-500;
+
+    &--light {
+      @apply bg-white border-slate-200;
+    }
+
+    &--dark {
+      @apply bg-slate-800/50 border-slate-700;
+    }
+  }
+
+  &__title {
+    @apply text-3xl font-bold text-center mb-12;
+
+    &--light {
+      @apply text-slate-900;
+    }
+
+    &--dark {
+      @apply text-white;
+    }
+  }
+
+  &__grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-center;
+  }
+
+  &__cell {
+    @apply flex justify-center;
+  }
+
+  &__card {
+    @apply flex flex-col items-center justify-center p-6 w-full rounded-xl border transition-all duration-300;
+
+    &:hover {
+      @apply shadow-md;
+    }
+
+    &--light {
+      @apply bg-slate-50 border-slate-100;
+
+      &:hover {
+        @apply border-indigo-100 bg-white;
+      }
+    }
+
+    &--dark {
+      @apply bg-slate-700/50 border-slate-600;
+
+      &:hover {
+        @apply border-slate-500 bg-slate-700;
+      }
+    }
+  }
+
+  &__icon {
+    @apply mb-4 transition-transform duration-300;
+
+    .skills-section__card:hover & {
+      transform: scale(1.1);
+    }
+  }
+
+  &__initials {
+    @apply text-xl font-bold;
+
+    &--light {
+      @apply text-slate-400;
+    }
+
+    &--dark {
+      @apply text-slate-500;
+    }
+  }
+
+  &__label {
+    @apply font-medium transition-colors;
+    color: var(--accent-color);
+
+    &--light {
+      @apply text-slate-700;
+    }
+
+    &--dark {
+      @apply text-slate-300;
+    }
+  }
+}

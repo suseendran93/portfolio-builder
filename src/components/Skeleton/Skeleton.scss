@@ -1,0 +1,27 @@
+@use "../../styles/tokens" as *;
+
+.skeleton {
+  margin-bottom: $space-3;
+  border-radius: $radius-sm;
+  background: $gradient-skeleton-light;
+  background-size: $size-skeleton-shift $size-full;
+  animation: skeleton-loading $duration-slow infinite;
+}
+
+.skeleton-circle {
+  border-radius: $radius-pill;
+}
+
+.dark .skeleton {
+  background: $gradient-skeleton-dark;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: $size-skeleton-shift $space-0;
+  }
+
+  100% {
+    background-position: -$size-skeleton-shift $space-0;
+  }
+}

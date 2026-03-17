@@ -2,9 +2,9 @@ import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import PublicPortfolioView from "./PublicPortfolioView";
-import { loadPublicPortfolioBySlug } from "../utils/portfolioStorage";
+import { loadPublicPortfolioBySlug } from "../../utils/portfolioStorage";
 
-jest.mock("../context/PortfolioContext", () => {
+jest.mock("../../context/PortfolioContext", () => {
   const React = require("react");
   return {
     PortfolioContext: React.createContext({
@@ -14,11 +14,11 @@ jest.mock("../context/PortfolioContext", () => {
   };
 });
 
-jest.mock("../utils/portfolioStorage", () => ({
+jest.mock("../../utils/portfolioStorage", () => ({
   loadPublicPortfolioBySlug: jest.fn()
 }));
 
-jest.mock("./PortfolioView", () => ({ publicMode }) => (
+jest.mock("../PortfolioView/PortfolioView", () => ({ publicMode }) => (
   <div>
     Portfolio View
     <span>{publicMode ? "Public Mode" : "Private Mode"}</span>

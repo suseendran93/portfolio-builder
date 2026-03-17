@@ -1,0 +1,59 @@
+@use "../../styles/tokens" as *;
+
+.success-page {
+  @apply min-h-screen bg-slate-50 flex items-center justify-center p-4;
+
+  &__card {
+    @apply max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center;
+  }
+
+  &__icon {
+    @apply inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-6;
+  }
+
+  &__icon-mark {
+    @apply text-emerald-600;
+  }
+
+  &__title {
+    @apply text-3xl font-bold text-slate-900 mb-2;
+  }
+
+  &__description {
+    @apply text-slate-600 mb-8;
+  }
+
+  &__highlight {
+    @apply text-amber-500 font-bold;
+  }
+
+  &__status {
+    @apply bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-8 flex items-center gap-4 text-left;
+  }
+
+  &__status-icon {
+    @apply bg-white p-3 rounded-xl shadow-sm;
+  }
+
+  &__status-mark {
+    @apply text-amber-500;
+  }
+
+  &__status-title {
+    @apply font-bold text-slate-900;
+  }
+
+  &__status-text {
+    @apply text-sm text-slate-500;
+  }
+
+  &__action {
+    @apply w-full py-4 text-white rounded-xl font-bold transition-all;
+    background-color: $color-text-primary;
+
+    &:hover {
+      transform: scale(1.02);
+      filter: brightness(1.08);
+    }
+  }
+}

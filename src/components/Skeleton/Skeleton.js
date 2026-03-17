@@ -1,5 +1,5 @@
 import React from "react";
-import "./Skeleton.css";
+import "./Skeleton.scss";
 
 const Skeleton = ({ width = "100%", height = "20px", circle = false, count = 1 }) => {
   return (
@@ -11,8 +11,6 @@ const Skeleton = ({ width = "100%", height = "20px", circle = false, count = 1 }
           style={{
             width,
             height,
-            borderRadius: circle ? "50%" : "4px",
-            marginBottom: "10px",
           }}
         />
       ))}

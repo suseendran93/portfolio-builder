@@ -1,16 +1,16 @@
-import "./App.css";
+import "./App.scss";
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { PortfolioProvider } from "./context/PortfolioContext";
-import Login from "./components/Login/Login";
-import Builder from "./components/Builder/Builder";
-import PortfolioView from "./pages/PortfolioView";
-import PublicPortfolioView from "./pages/PublicPortfolioView";
-import Success from "./pages/Success";
-import Cancel from "./pages/Cancel";
-import Signup from "./components/Signup/Signup";
-import { useAuth } from "./context/AuthContext";
-import NotFound from "./pages/NotFound";
+import { PortfolioProvider } from "../context/PortfolioContext";
+import Login from "../components/Login/Login";
+import Builder from "../components/Builder/Builder";
+import PortfolioView from "../pages/PortfolioView/PortfolioView";
+import PublicPortfolioView from "../pages/PublicPortfolioView/PublicPortfolioView";
+import Success from "../pages/Success/Success";
+import Cancel from "../pages/Cancel/Cancel";
+import Signup from "../components/Signup/Signup";
+import { useAuth } from "../context/AuthContext";
+import NotFound from "../pages/NotFound/NotFound";
 import { Toaster } from "react-hot-toast";
 
 const PrivateRoute = ({ children }) => {
@@ -22,7 +22,7 @@ const PrivateRoute = ({ children }) => {
 const App = () => {
   return (
     <PortfolioProvider>
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="app-shell">
         <Toaster position="top-right" />
         <Routes>
           {/* Public Route FIRST to ensure priority */}

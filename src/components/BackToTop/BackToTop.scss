@@ -1,0 +1,49 @@
+@use "../../styles/tokens" as *;
+
+.back-to-top {
+  position: fixed;
+  right: $size-back-to-top-offset;
+  bottom: $size-back-to-top-offset;
+  z-index: $z-floating;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $size-back-to-top;
+  height: $size-back-to-top;
+  border: $space-0;
+  border-radius: $radius-pill;
+  cursor: pointer;
+  color: $color-text-inverse;
+  background-color: $color-icon-muted;
+  box-shadow: $shadow-floating;
+  animation: slide-in $duration-fast $easing-standard;
+  transition:
+    transform $duration-fast $easing-standard,
+    box-shadow $duration-fast $easing-standard,
+    background-color $duration-fast $easing-standard;
+
+  &:hover {
+    background-color: $color-brand-primary;
+    transform: translateY($translate-back-to-top);
+    box-shadow: $shadow-floating-hover;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    right: $size-back-to-top-offset-mobile;
+    bottom: $size-back-to-top-offset-mobile;
+    width: $size-back-to-top-mobile;
+    height: $size-back-to-top-mobile;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: $opacity-hidden;
+    transform: translateY($translate-hidden);
+  }
+
+  to {
+    opacity: $opacity-visible;
+    transform: translateY($space-0);
+  }
+}
