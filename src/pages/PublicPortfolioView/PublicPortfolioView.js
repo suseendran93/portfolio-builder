@@ -65,7 +65,7 @@ const PublicPortfolioView = () => {
     }
 
     return (
-        <PortfolioContext.Provider value={{ portfolioData, updatePortfolioData }}>
+        <PortfolioContext.Provider value={{ portfolioData, isPortfolioLoaded: true, updatePortfolioData }}>
             <PortfolioView publicMode={true} />
         </PortfolioContext.Provider>
     );

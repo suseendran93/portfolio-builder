@@ -5,12 +5,14 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette, FaArrowRight, FaRocket } from 'react-icons/fa';
 import Customizer from './Customizer';
 import { savePortfolioForUser } from '../../utils/portfolioStorage';
 import { createDefaultPortfolioData, normalizePortfolioData } from '../../utils/customization';
 import { isValidExternalUrlInput } from '../../utils/contact';
 import { optimizeImageFile } from '../../utils/imageUpload';
+import { STARTER_TEMPLATES, hasMeaningfulPortfolioContent } from '../../utils/onboarding';
+import { buildPublicPortfolioUrl } from '../../utils/router';
 import './Builder.scss';
 
 // Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
@@ -24,7 +26,7 @@ const formatDateDisplay = (dateStr) => {
 };
 
 const Builder = () => {
-    const { portfolioData, replacePortfolioData } = useContext(PortfolioContext);
+    const { portfolioData, isPortfolioLoaded, replacePortfolioData } = useContext(PortfolioContext);
     const { currentUser, userData, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('about');
@@ -33,6 +35,7 @@ const Builder = () => {
     const [generatedUrl, setGeneratedUrl] = useState('');
     const [generating, setGenerating] = useState(false);
     const [isCustomizing, setIsCustomizing] = useState(false);
+    const [isOnboardingDismissed, setIsOnboardingDismissed] = useState(false);
 
     const isPremium = userData?.tier === 'PREMIUM';
 
@@ -108,7 +111,9 @@ const Builder = () => {
 
     useEffect(() => {
         if (portfolioData) {
-            setLocalData(normalizePortfolioData(portfolioData));
+            const nextData = normalizePortfolioData(portfolioData);
+            setLocalData(nextData);
+            setIsOnboardingDismissed(hasMeaningfulPortfolioContent(nextData));
         }
     }, [portfolioData]);
 
@@ -215,8 +220,7 @@ const Builder = () => {
             const nextData = normalizePortfolioData(cleanData);
             setLocalData(nextData);
             replacePortfolioData(nextData);
-            const baseUrl = window.location.href.split('#')[0].replace(/\/$/, "");
-            setGeneratedUrl(`${baseUrl}/#/p/${urlSlug}`);
+            setGeneratedUrl(buildPublicPortfolioUrl(urlSlug));
             setShowModal(true);
             toast.success("Portfolio published successfully!");
         } catch (error) {
@@ -258,6 +262,30 @@ const Builder = () => {
         setLocalData(prev => ({ ...prev, [section]: newData }));
     };
 
+    const handleApplyStarterTemplate = (templateId) => {
+        const template = STARTER_TEMPLATES.find((item) => item.id === templateId);
+
+        if (!template) {
+            toast.error("Starter template not found.");
+            return;
+        }
+
+        setLocalData(template.data);
+        replacePortfolioData(template.data);
+        setActiveTab('about');
+        setIsCustomizing(false);
+        setShowAllErrors(false);
+        setIsOnboardingDismissed(true);
+        toast.success(`${template.label} starter loaded. Replace the sample content with your own.`);
+    };
+
+    const handleStartBlank = () => {
+        setIsOnboardingDismissed(true);
+        setActiveTab('about');
+        setIsCustomizing(false);
+        toast.success("Blank workspace ready. Start with your profile details.");
+    };
+
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -272,6 +300,12 @@ const Builder = () => {
                 });
         }
     };
+
+    const shouldShowOnboarding =
+        isPortfolioLoaded &&
+        !isCustomizing &&
+        !isOnboardingDismissed &&
+        !hasMeaningfulPortfolioContent(localData);
 
     return (
         <div className="builder">
@@ -368,7 +402,91 @@ const Builder = () => {
                     {/* Content Area */}
                     <div className="builder__content-column">
                         <div className="builder__panel">
-                            {isCustomizing ? (
+                            {!isPortfolioLoaded ? (
+                                <div className="builder__loading-state">
+                                    <span className="builder__loading-badge">Loading</span>
+                                    <h2 className="builder__loading-title">Restoring your workspace.</h2>
+                                    <p className="builder__loading-text">Fetching your saved portfolio, customization, and publishing state.</p>
+                                </div>
+                            ) : shouldShowOnboarding ? (
+                                <div className="builder__onboarding">
+                                    <div className="builder__onboarding-hero">
+                                        <div className="builder__onboarding-copy">
+                                            <span className="builder__onboarding-badge">New here</span>
+                                            <h2 className="builder__onboarding-title">Start with a recruiter-ready draft instead of a blank page.</h2>
+                                            <p className="builder__onboarding-text">
+                                                Choose a starter built for common fresher roles, then replace the sample content with your own projects, experience, and links.
+                                            </p>
+                                            <div className="builder__onboarding-actions">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleStartBlank}
+                                                    className="builder__onboarding-button builder__onboarding-button--secondary"
+                                                >
+                                                    Start Blank
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleApplyStarterTemplate(STARTER_TEMPLATES[0].id)}
+                                                    className="builder__onboarding-button builder__onboarding-button--primary"
+                                                >
+                                                    Use Recommended Starter <FaArrowRight />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="builder__onboarding-summary">
+                                            <div className="builder__onboarding-summary-card">
+                                                <div className="builder__onboarding-summary-icon">
+                                                    <FaRocket />
+                                                </div>
+                                                <div>
+                                                    <p className="builder__onboarding-summary-title">What you get</p>
+                                                    <p className="builder__onboarding-summary-text">Sample portfolio content, role-specific wording, starter styling, and a faster path to preview.</p>
+                                                </div>
+                                            </div>
+                                            <div className="builder__onboarding-steps">
+                                                <div className="builder__onboarding-step">
+                                                    <span className="builder__onboarding-step-index">1</span>
+                                                    <p>Pick a starter that matches the role you are applying for.</p>
+                                                </div>
+                                                <div className="builder__onboarding-step">
+                                                    <span className="builder__onboarding-step-index">2</span>
+                                                    <p>Replace the sample copy with your own education, projects, and contact details.</p>
+                                                </div>
+                                                <div className="builder__onboarding-step">
+                                                    <span className="builder__onboarding-step-index">3</span>
+                                                    <p>Preview, style, and publish when the draft feels like you.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="builder__onboarding-grid">
+                                        {STARTER_TEMPLATES.map((template) => (
+                                            <button
+                                                key={template.id}
+                                                type="button"
+                                                onClick={() => handleApplyStarterTemplate(template.id)}
+                                                className="builder__onboarding-card"
+                                                style={{ "--starter-accent": template.accentColor }}
+                                            >
+                                                <div className="builder__onboarding-card-head">
+                                                    <div>
+                                                        <p className="builder__onboarding-card-kicker">{template.audience}</p>
+                                                        <h3 className="builder__onboarding-card-title">{template.label}</h3>
+                                                    </div>
+                                                    <span className="builder__onboarding-card-accent"></span>
+                                                </div>
+                                                <p className="builder__onboarding-card-text">{template.summary}</p>
+                                                <span className="builder__onboarding-card-link">
+                                                    Load Starter <FaArrowRight />
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : isCustomizing ? (
                                 <Customizer
                                     localData={localData}
                                     setLocalData={setLocalData}

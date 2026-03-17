@@ -187,6 +187,210 @@
     @apply flex flex-col gap-6;
   }
 
+  &__loading-state {
+    @apply flex h-full min-h-[24rem] flex-col justify-center rounded-xl;
+    padding: $space-8;
+    border: 1px solid $color-border-soft;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.9)),
+      $color-surface;
+  }
+
+  &__loading-badge {
+    @apply inline-flex w-fit items-center rounded-full text-xs font-bold uppercase tracking-widest;
+    padding: $space-2 $space-3;
+    color: $color-brand-primary;
+    background-color: $color-brand-highlight;
+  }
+
+  &__loading-title {
+    @apply text-3xl font-bold;
+    margin-top: $space-5;
+    color: $color-text-primary;
+  }
+
+  &__loading-text {
+    @apply text-base;
+    max-width: 34rem;
+    margin-top: $space-3;
+    color: $color-text-secondary;
+  }
+
+  &__onboarding {
+    @apply flex flex-col gap-8;
+  }
+
+  &__onboarding-hero {
+    @apply grid grid-cols-1 xl:grid-cols-[1.3fr_0.9fr] gap-6;
+  }
+
+  &__onboarding-copy,
+  &__onboarding-summary {
+    border: 1px solid $color-border-soft;
+    border-radius: $radius-xl;
+    background-color: rgba(248, 250, 252, 0.92);
+  }
+
+  &__onboarding-copy {
+    padding: $space-8;
+    background:
+      linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(124, 58, 237, 0.04)),
+      $color-surface;
+  }
+
+  &__onboarding-badge {
+    @apply inline-flex w-fit items-center rounded-full text-xs font-bold uppercase tracking-widest;
+    margin-bottom: $space-4;
+    padding: $space-2 $space-3;
+    color: $color-brand-primary;
+    background-color: $color-brand-highlight;
+  }
+
+  &__onboarding-title {
+    @apply text-3xl font-bold;
+    max-width: 18ch;
+    color: $color-text-primary;
+  }
+
+  &__onboarding-text {
+    @apply text-base;
+    max-width: 36rem;
+    margin-top: $space-4;
+    color: $color-text-secondary;
+  }
+
+  &__onboarding-actions {
+    @apply flex flex-wrap gap-3;
+    margin-top: $space-6;
+  }
+
+  &__onboarding-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold;
+    min-height: $space-12;
+    padding: $space-3 $space-6;
+    border: 1px solid transparent;
+
+    &--primary {
+      color: $color-text-inverse;
+      background-color: $color-brand-primary;
+      box-shadow: 0 0.75rem 2rem $color-brand-primary-soft;
+
+      &:hover {
+        background-color: #4338ca;
+      }
+    }
+
+    &--secondary {
+      color: $color-text-primary;
+      border-color: $color-border-soft;
+      background-color: $color-surface;
+
+      &:hover {
+        background-color: $color-page-background;
+      }
+    }
+  }
+
+  &__onboarding-summary {
+    @apply flex flex-col gap-5;
+    padding: $space-6;
+  }
+
+  &__onboarding-summary-card {
+    @apply flex items-start gap-4;
+  }
+
+  &__onboarding-summary-icon {
+    @apply inline-flex shrink-0 items-center justify-center rounded-2xl;
+    width: $space-12 + $space-2;
+    height: $space-12 + $space-2;
+    color: $color-text-inverse;
+    background: linear-gradient(135deg, $color-brand-primary 0%, $color-brand-secondary 100%);
+    box-shadow: $shadow-floating;
+  }
+
+  &__onboarding-summary-title {
+    @apply text-sm font-bold uppercase tracking-widest;
+    color: $color-text-secondary;
+  }
+
+  &__onboarding-summary-text {
+    margin-top: $space-2;
+    color: $color-text-primary;
+  }
+
+  &__onboarding-steps {
+    @apply flex flex-col gap-3;
+  }
+
+  &__onboarding-step {
+    @apply flex items-start gap-3;
+    color: $color-text-secondary;
+  }
+
+  &__onboarding-step-index {
+    @apply inline-flex shrink-0 items-center justify-center rounded-full text-sm font-bold;
+    width: $space-8;
+    height: $space-8;
+    color: $color-brand-primary;
+    background-color: $color-brand-highlight;
+  }
+
+  &__onboarding-grid {
+    @apply grid grid-cols-1 xl:grid-cols-3 gap-4;
+  }
+
+  &__onboarding-card {
+    @apply flex h-full flex-col rounded-xl text-left;
+    padding: $space-6;
+    border: 1px solid $color-border-soft;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.9)),
+      $color-surface;
+
+    &:hover {
+      transform: translateY(-$space-1);
+      box-shadow: $shadow-floating-hover;
+      border-color: rgba(79, 70, 229, 0.2);
+    }
+  }
+
+  &__onboarding-card-head {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  &__onboarding-card-kicker {
+    @apply text-xs font-semibold uppercase tracking-widest;
+    color: $color-text-secondary;
+  }
+
+  &__onboarding-card-title {
+    @apply text-xl font-bold;
+    margin-top: $space-2;
+    color: $color-text-primary;
+  }
+
+  &__onboarding-card-accent {
+    @apply rounded-full shrink-0;
+    width: $space-3;
+    height: $space-3;
+    margin-top: $space-2;
+    background-color: var(--starter-accent);
+    box-shadow: 0 0 0 0.35rem rgba(255, 255, 255, 0.85);
+  }
+
+  &__onboarding-card-text {
+    @apply flex-1 text-sm;
+    margin-top: $space-4;
+    color: $color-text-secondary;
+  }
+
+  &__onboarding-card-link {
+    @apply inline-flex items-center gap-2 text-sm font-semibold;
+    margin-top: $space-6;
+    color: var(--starter-accent);
+  }
+
   &__section-header {
     @apply flex items-start justify-between gap-4;
     padding-bottom: $space-4;
@@ -671,6 +875,7 @@
     &__avatar-row,
     &__section-header,
     &__panel-footer,
+    &__onboarding-actions,
     .builder-modal__actions {
       align-items: stretch;
       flex-direction: column;
@@ -687,8 +892,20 @@
 
     &__next-action,
     &__action,
+    &__onboarding-button,
     .builder-modal__button {
       width: $size-full;
+    }
+
+    &__onboarding-copy,
+    &__onboarding-summary,
+    &__onboarding-card {
+      padding: $space-6;
+    }
+
+    &__onboarding-title {
+      max-width: none;
+      font-size: 2rem;
     }
   }
 }

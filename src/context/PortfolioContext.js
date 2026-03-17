@@ -8,10 +8,13 @@ export const PortfolioContext = createContext();
 export const PortfolioProvider = ({ children }) => {
   const { currentUser } = useAuth();
   const [portfolioData, setPortfolioData] = useState(createDefaultPortfolioData);
+  const [isPortfolioLoaded, setIsPortfolioLoaded] = useState(false);
 
   // Fetch data when user logs in or changes
   useEffect(() => {
-        const fetchData = async () => {
+    const fetchData = async () => {
+      setIsPortfolioLoaded(false);
+
       if (currentUser) {
         console.log("PortfolioContext: Fetching data for user:", currentUser.uid);
         try {
@@ -26,11 +29,14 @@ export const PortfolioProvider = ({ children }) => {
           }
         } catch (error) {
           console.error("PortfolioContext: Error fetching portfolio data:", error);
+        } finally {
+          setIsPortfolioLoaded(true);
         }
       } else {
         // User is logged out, reset state
         console.log("PortfolioContext: User logged out, clearing state");
         setPortfolioData(createDefaultPortfolioData());
+        setIsPortfolioLoaded(true);
       }
     };
 
@@ -50,9 +56,10 @@ export const PortfolioProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     portfolioData,
+    isPortfolioLoaded,
     updatePortfolioData,
     replacePortfolioData
-  }), [portfolioData]);
+  }), [isPortfolioLoaded, portfolioData]);
 
   return (
     <PortfolioContext.Provider value={value}>
