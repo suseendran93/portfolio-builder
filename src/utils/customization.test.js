@@ -6,6 +6,11 @@ import {
   normalizePortfolioData,
   parseHexColor
 } from "./customization";
+import {
+  isValidExternalUrlInput,
+  normalizeContactInfo,
+  normalizeExternalUrl
+} from "./contact";
 import { getResumeStyles } from "./resumeStyles";
 
 describe("customization normalization", () => {
@@ -37,7 +42,11 @@ describe("customization normalization", () => {
   it("fills missing portfolio data with safe defaults", () => {
     expect(
       normalizePortfolioData({
-        contact: { email: "test@example.com" },
+        contact: {
+          email: "test@example.com",
+          github: "github.com/example",
+          linkedin: "javascript:alert(1)"
+        },
         skills: [{ name: "React", percent: 90 }, "CSS"],
         customization: {
           portfolio: {
@@ -54,7 +63,7 @@ describe("customization normalization", () => {
       contact: {
         phone: "",
         email: "test@example.com",
-        github: "",
+        github: "https://github.com/example",
         linkedin: ""
       },
       customization: {
@@ -65,6 +74,24 @@ describe("customization normalization", () => {
         },
         resume: DEFAULT_RESUME_CUSTOMIZATION
       }
+    });
+  });
+});
+
+describe("contact normalization", () => {
+  it("normalizes safe external urls and rejects unsafe schemes", () => {
+    expect(normalizeExternalUrl("github.com/example")).toBe("https://github.com/example");
+    expect(normalizeExternalUrl("javascript:alert(1)")).toBe("");
+    expect(isValidExternalUrlInput("linkedin.com/in/example")).toBe(true);
+    expect(isValidExternalUrlInput("ftp://example.com")).toBe(false);
+    expect(
+      normalizeContactInfo({
+        github: "https://github.com/example",
+        linkedin: " data:text/html,test "
+      })
+    ).toMatchObject({
+      github: "https://github.com/example",
+      linkedin: ""
     });
   });
 });

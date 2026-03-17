@@ -2,34 +2,36 @@ import React, { useContext } from "react";
 import { PortfolioContext } from "../context/PortfolioContext";
 import { FaMobileAlt, FaEnvelope, FaLinkedin, FaGithub } from "react-icons/fa";
 import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from "../utils/customization";
+import { normalizeContactInfo } from "../utils/contact";
 import "./Contact/Contact.scss";
 
 const Contact = () => {
   const { portfolioData } = useContext(PortfolioContext);
   const customization = normalizeCustomization(portfolioData.customization).portfolio || DEFAULT_PORTFOLIO_CUSTOMIZATION;
+  const contact = normalizeContactInfo(portfolioData.contact);
   const { theme, accentColor } = customization;
   const isDark = theme === 'dark' || theme === 'royal';
 
   const contactItems = [
     {
       icon: <FaMobileAlt size={30} />,
-      desc: portfolioData.contact.phone,
+      desc: contact.phone,
       href: null
     },
     {
       icon: <FaEnvelope size={30} />,
-      desc: portfolioData.contact.email,
-      href: portfolioData.contact.email ? `mailto:${portfolioData.contact.email}` : null
+      desc: contact.email,
+      href: contact.email ? `mailto:${contact.email}` : null
     },
     {
       icon: <FaLinkedin size={30} />,
       desc: "LinkedIn",
-      href: portfolioData.contact.linkedin
+      href: contact.linkedin
     },
     {
       icon: <FaGithub size={30} />,
       desc: "GitHub",
-      href: portfolioData.contact.github
+      href: contact.github
     }
   ].filter(item => item.desc && item.href !== ""); // Filter out empty items
 

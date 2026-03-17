@@ -11,6 +11,7 @@ import Education from "../../components/Education";
 import ResumeDownload from "../../components/ResumeDownload/ResumeDownload";
 import { useAuth } from "../../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from '../../utils/customization';
 import './PortfolioView.scss';
 
@@ -64,7 +65,7 @@ const PortfolioView = ({ publicMode = false }) => {
                                 navigate('/');
                             } catch (error) {
                                 console.error("Logout Error:", error);
-                                alert("Failed to log out: " + error.message);
+                                toast.error("Failed to log out: " + error.message);
                             }
                         }}
                         className="portfolio-view__toolbar-button portfolio-view__toolbar-button--danger"

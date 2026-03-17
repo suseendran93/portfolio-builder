@@ -80,4 +80,12 @@ describe("App routing", () => {
 
     expect(screen.getByText("Public Portfolio")).toBeInTheDocument();
   });
+
+  it("renders not found for unknown routes", () => {
+    mockUseAuth.mockReturnValue({ currentUser: null });
+
+    renderAppAtRoute("/missing-route");
+
+    expect(screen.getByText("Not Found")).toBeInTheDocument();
+  });
 });

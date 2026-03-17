@@ -25,14 +25,11 @@ const App = () => {
       <div className="app-shell">
         <Toaster position="top-right" />
         <Routes>
-          {/* Public Route FIRST to ensure priority */}
+          <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/p/:slug" element={<PublicPortfolioView />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
-          <Route path="*" element={<Navigate to="/" />} />
-
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
           <Route
             path="/builder"
             element={
@@ -49,7 +46,6 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          {/* Fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

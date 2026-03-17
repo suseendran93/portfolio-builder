@@ -9,6 +9,8 @@ import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTr
 import Customizer from './Customizer';
 import { savePortfolioForUser } from '../../utils/portfolioStorage';
 import { createDefaultPortfolioData, normalizePortfolioData } from '../../utils/customization';
+import { isValidExternalUrlInput } from '../../utils/contact';
+import { optimizeImageFile } from '../../utils/imageUpload';
 import './Builder.scss';
 
 // Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
@@ -62,6 +64,12 @@ const Builder = () => {
         }
 
         if (!data.contact?.phone?.trim()) errors.phone = "Phone is required";
+        if (!isValidExternalUrlInput(data.contact?.linkedin)) {
+            errors.linkedin = "Enter a valid LinkedIn URL";
+        }
+        if (!isValidExternalUrlInput(data.contact?.github)) {
+            errors.github = "Enter a valid GitHub URL";
+        }
 
         if (!data.education || data.education.length === 0) {
             errors.education = "At least one education entry is required";
@@ -253,9 +261,15 @@ const Builder = () => {
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => handleLocalChange('profilePic', reader.result);
-            reader.readAsDataURL(file);
+            optimizeImageFile(file)
+                .then((optimizedImage) => {
+                    handleLocalChange('profilePic', optimizedImage);
+                    toast.success("Profile image optimized for upload.");
+                })
+                .catch((error) => {
+                    console.error("Image upload error:", error);
+                    toast.error(error.message);
+                });
         }
     };
 
@@ -699,8 +713,18 @@ const Builder = () => {
                                                     onChange={(e) => handleLocalChange('contact', { ...localData.contact, email: e.target.value })}
                                                     error={showAllErrors ? fieldErrors.email : null}
                                                 />
-                                                <InputGroup label="LinkedIn URL" value={localData.contact.linkedin || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, linkedin: e.target.value })} />
-                                                <InputGroup label="GitHub URL" value={localData.contact.github || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })} />
+                                                <InputGroup
+                                                    label="LinkedIn URL"
+                                                    value={localData.contact.linkedin || ''}
+                                                    onChange={(e) => handleLocalChange('contact', { ...localData.contact, linkedin: e.target.value })}
+                                                    error={showAllErrors ? fieldErrors.linkedin : null}
+                                                />
+                                                <InputGroup
+                                                    label="GitHub URL"
+                                                    value={localData.contact.github || ''}
+                                                    onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })}
+                                                    error={showAllErrors ? fieldErrors.github : null}
+                                                />
                                             </div>
 
                                             <div className="builder__panel-footer">

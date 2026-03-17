@@ -1,3 +1,5 @@
+import { normalizeContactInfo } from "./contact";
+
 export const PORTFOLIO_LAYOUT_OPTIONS = [
   { id: "modern", name: "Modern", description: "Clean and professional with a balanced split" },
   { id: "classic", name: "Classic", description: "Traditional editorial layout with restrained details" },
@@ -25,13 +27,6 @@ export const DEFAULT_PORTFOLIO_CUSTOMIZATION = Object.freeze({
 export const DEFAULT_RESUME_CUSTOMIZATION = Object.freeze({
   layout: "standard",
   accentColor: "#1e293b"
-});
-
-export const DEFAULT_CONTACT = Object.freeze({
-  phone: "",
-  email: "",
-  github: "",
-  linkedin: ""
 });
 
 const HEX_COLOR_PATTERN = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
@@ -110,9 +105,7 @@ export const createDefaultPortfolioData = () => ({
   customSlug: "",
   published: false,
   publishedAt: null,
-  contact: {
-    ...DEFAULT_CONTACT
-  },
+  contact: normalizeContactInfo(),
   customization: normalizeCustomization()
 });
 
@@ -141,10 +134,10 @@ export const normalizePortfolioData = (data = {}) => {
     skills: Array.isArray(data.skills)
       ? data.skills.map(normalizeSkill)
       : defaults.skills,
-    contact: {
+    contact: normalizeContactInfo({
       ...defaults.contact,
       ...(data.contact || {})
-    },
+    }),
     customization: normalizeCustomization(data.customization)
   };
 };
