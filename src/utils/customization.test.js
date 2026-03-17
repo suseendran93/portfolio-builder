@@ -38,6 +38,7 @@ describe("customization normalization", () => {
     expect(
       normalizePortfolioData({
         contact: { email: "test@example.com" },
+        skills: [{ name: "React", percent: 90 }, "CSS"],
         customization: {
           portfolio: {
             theme: "royal",
@@ -49,7 +50,7 @@ describe("customization normalization", () => {
       about: "",
       education: [],
       work: [],
-      skills: [],
+      skills: [{ name: "React" }, { name: "CSS" }],
       contact: {
         phone: "",
         email: "test@example.com",

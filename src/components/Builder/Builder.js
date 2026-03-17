@@ -636,7 +636,7 @@ const Builder = () => {
                                                     )}
                                                 </div>
                                                 <button
-                                                    onClick={() => handleLocalChange('skills', [...localData.skills, { name: "New Skill", percent: 50 }])}
+                                                    onClick={() => handleLocalChange('skills', [...localData.skills, { name: "New Skill" }])}
                                                     className="builder__section-add"
                                                 >
                                                     <FaPlus /> Add New
@@ -672,23 +672,6 @@ const Builder = () => {
                                                                 {showAllErrors && !skill.name?.trim() && (
                                                                     <p className="builder__skill-error">Required</p>
                                                                 )}
-                                                            </div>
-                                                            <div className="builder__skill-group">
-                                                                <label className="builder__skill-label-row">
-                                                                    <span>Proficiency</span>
-                                                                    <span>{skill.percent}%</span>
-                                                                </label>
-                                                                <input
-                                                                    type="range"
-                                                                    min="0" max="100"
-                                                                    className="builder__skill-range"
-                                                                    value={skill.percent || 0}
-                                                                    onChange={(e) => {
-                                                                        const newSkills = [...localData.skills];
-                                                                        newSkills[index] = { ...newSkills[index], percent: e.target.value };
-                                                                        handleLocalChange('skills', newSkills);
-                                                                    }}
-                                                                />
                                                             </div>
                                                         </div>
                                                     </div>

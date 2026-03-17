@@ -116,6 +116,20 @@ export const createDefaultPortfolioData = () => ({
   customization: normalizeCustomization()
 });
 
+const normalizeSkill = (skill) => {
+  if (typeof skill === "string") {
+    return { name: skill };
+  }
+
+  if (!skill || typeof skill !== "object") {
+    return { name: "" };
+  }
+
+  return {
+    name: typeof skill.name === "string" ? skill.name : ""
+  };
+};
+
 export const normalizePortfolioData = (data = {}) => {
   const defaults = createDefaultPortfolioData();
 
@@ -124,7 +138,9 @@ export const normalizePortfolioData = (data = {}) => {
     ...data,
     work: Array.isArray(data.work) ? data.work : defaults.work,
     education: Array.isArray(data.education) ? data.education : defaults.education,
-    skills: Array.isArray(data.skills) ? data.skills : defaults.skills,
+    skills: Array.isArray(data.skills)
+      ? data.skills.map(normalizeSkill)
+      : defaults.skills,
     contact: {
       ...defaults.contact,
       ...(data.contact || {})
