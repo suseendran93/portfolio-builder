@@ -7,6 +7,9 @@ import { VscVscode } from "react-icons/vsc";
 
 const Skills = () => {
   const { portfolioData } = useContext(PortfolioContext);
+  const customization = portfolioData.customization?.portfolio || { theme: 'light', accentColor: '#4f46e5' };
+  const { theme } = customization;
+  const isDark = theme === 'dark' || theme === 'royal';
 
   if (!portfolioData.skills || portfolioData.skills.length === 0) return null;
 
@@ -27,23 +30,27 @@ const Skills = () => {
   };
 
   return (
-    <div className="py-20 bg-slate-50">
+    <div className={`py-20 transition-colors duration-500 ${isDark ? 'bg-transparent' : 'bg-slate-50'}`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-center">
           <div className="w-full lg:w-10/12">
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-12">
-              <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">My Skills</h2>
+            <div className={`rounded-2xl shadow-sm border p-8 md:p-12 transition-colors duration-500 ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'
+              }`}>
+              <h2 className={`text-3xl font-bold text-center mb-12 ${isDark ? 'text-white' : 'text-slate-900'}`}>My Skills</h2>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 justify-center">
                 {portfolioData.skills && portfolioData.skills.map((skill, index) => {
                   const icon = getIcon(skill.name);
                   return (
                     <div key={index} className="flex justify-center">
-                      <div className="group flex flex-col items-center justify-center p-6 w-full rounded-xl bg-slate-50 border border-slate-100 hover:border-indigo-100 hover:shadow-md hover:bg-white transition-all duration-300">
+                      <div className={`group flex flex-col items-center justify-center p-6 w-full rounded-xl border transition-all duration-300 hover:shadow-md ${isDark
+                        ? 'bg-slate-700/50 border-slate-600 hover:border-slate-500 hover:bg-slate-700'
+                        : 'bg-slate-50 border-slate-100 hover:border-indigo-100 hover:bg-white'
+                        }`}>
                         <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                          {icon ? icon : <div className="text-xl font-bold text-slate-400">{skill.name.substring(0, 2).toUpperCase()}</div>}
+                          {icon ? icon : <div className={`text-xl font-bold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{skill.name.substring(0, 2).toUpperCase()}</div>}
                         </div>
-                        <span className="font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                        <span className={`font-medium transition-colors ${isDark ? 'text-slate-300' : 'text-slate-700'}`} style={{ color: customization.accentColor }}>
                           {skill.name}
                         </span>
                       </div>

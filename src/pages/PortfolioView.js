@@ -34,8 +34,18 @@ const PortfolioView = ({ publicMode = false }) => {
         }
     };
 
+    const customization = portfolioData.customization?.portfolio || { theme: 'light', layout: 'modern', accentColor: '#4f46e5' };
+
+    const getThemeClasses = () => {
+        switch (customization.theme) {
+            case 'dark': return 'bg-slate-900 text-slate-100';
+            case 'royal': return 'bg-indigo-900 text-white';
+            default: return 'bg-slate-50 text-slate-900';
+        }
+    };
+
     return (
-        <div className="bg-slate-50 min-h-screen text-slate-900 font-inter">
+        <div className={`min-h-screen font-inter transition-colors duration-500 ${getThemeClasses()}`}>
             {!publicMode && (
                 <div className="fixed top-24 right-5 z-50 bg-white/90 backdrop-blur-md p-3 rounded-full flex gap-2 shadow-lg border border-slate-200">
                     <button

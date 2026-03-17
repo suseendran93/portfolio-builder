@@ -4,17 +4,20 @@ import { FaBuilding } from "react-icons/fa";
 
 const Work = () => {
   const { portfolioData } = useContext(PortfolioContext);
+  const customization = portfolioData.customization?.portfolio || { theme: 'light', accentColor: '#4f46e5' };
+  const { theme, accentColor } = customization;
+  const isDark = theme === 'dark' || theme === 'royal';
 
   if (!portfolioData.work || portfolioData.work.length === 0) return null;
 
   return (
-    <section className="py-20 bg-white">
+    <section className={`py-20 transition-colors duration-500 ${isDark ? 'bg-transparent' : 'bg-white'}`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-center">
           <div className="w-full lg:w-8/12">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Work Experience</h2>
-              <div className="h-1 w-20 bg-indigo-600 mx-auto rounded-full"></div>
+              <h2 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Work Experience</h2>
+              <div className="h-1 w-20 mx-auto rounded-full" style={{ backgroundColor: accentColor }}></div>
             </div>
 
             <div className="space-y-8">
@@ -22,23 +25,24 @@ const Work = () => {
                 portfolioData.work.map((item, idx) => (
                   <div key={idx} className="relative pl-0">
                     {/* Timeline connector for larger screens could go here, keeping it simple for now */}
-                    <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all duration-300">
+                    <div className={`p-8 rounded-2xl border transition-all duration-300 hover:shadow-lg ${isDark ? 'bg-slate-800/50 border-slate-700 hover:border-slate-600' : 'bg-slate-50 border-slate-100 hover:border-indigo-100'
+                      }`}>
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
                         <div className="flex items-center gap-3 mb-2 md:mb-0">
-                          <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+                          <div className={`p-3 rounded-lg ${isDark ? 'bg-white/10' : 'bg-indigo-100'}`} style={{ color: accentColor }}>
                             <FaBuilding size={20} />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-slate-900">
+                            <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                               {typeof item === 'string' ? `Experience ${idx + 1}` : (item.company || "Company Name")}
                             </h3>
                             {typeof item !== 'string' && (
-                              <h4 className="text-indigo-600 font-medium">{item.role || "Role"}</h4>
+                              <h4 className="font-medium" style={{ color: accentColor }}>{item.role || "Role"}</h4>
                             )}
                           </div>
                         </div>
                         {typeof item !== 'string' && (
-                          <div className="text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                          <div className={`text-sm font-semibold px-3 py-1 rounded-full ${isDark ? 'text-slate-400 bg-slate-700' : 'text-slate-500 bg-slate-100'}`}>
                             {item.date || "Date"}
                           </div>
                         )}
@@ -46,14 +50,14 @@ const Work = () => {
 
                       {typeof item !== 'string' && item.responsibilities && (
                         <div className="mt-3">
-                          <h5 className="text-sm font-semibold text-slate-700 mb-1">Roles & Responsibilities</h5>
-                          <p className="text-slate-600 leading-relaxed whitespace-pre-line">{item.responsibilities}</p>
+                          <h5 className={`text-sm font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Roles & Responsibilities</h5>
+                          <p className={`leading-relaxed whitespace-pre-line ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.responsibilities}</p>
                         </div>
                       )}
                       {typeof item !== 'string' && item.accomplishments && (
                         <div className="mt-3">
-                          <h5 className="text-sm font-semibold text-slate-700 mb-1">Work Accomplishments</h5>
-                          <p className="text-slate-600 leading-relaxed whitespace-pre-line">{item.accomplishments}</p>
+                          <h5 className={`text-sm font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Work Accomplishments</h5>
+                          <p className={`leading-relaxed whitespace-pre-line ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.accomplishments}</p>
                         </div>
                       )}
                       {/* Legacy fallback for old data with description */}

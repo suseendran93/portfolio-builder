@@ -2,7 +2,7 @@ import React, { useRef, useContext, useState } from 'react';
 import { PortfolioContext } from '../../context/PortfolioContext';
 import { FaDownload } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js';
+import html2pdf from 'html2pdf.js';
 
 const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = false }) => {
     const { portfolioData } = useContext(PortfolioContext);
@@ -16,16 +16,23 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
         const toastId = toast.loading('Generating your resume PDF…');
 
         try {
+            const fileName = `${(portfolioData.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`;
             const opt = {
-                margin: [12, 14, 12, 14],
-                filename: `${(portfolioData.name || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`,
+                margin: [10, 15, 10, 15],
+                filename: fileName,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 794 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    width: 794
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            await html2pdf().set(opt).from(resumeRef.current).save();
+            // Use the worker API explicitly for better control
+            await html2pdf().from(resumeRef.current).set(opt).save();
             toast.success('Resume downloaded!', { id: toastId });
         } catch (error) {
             console.error('PDF generation error:', error);
@@ -35,11 +42,8 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
         }
     };
 
-    const buttonStyles = variant === 'primary'
-        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 shadow-lg shadow-indigo-200'
-        : 'bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-50 shadow-sm';
-
-    const workEntries = portfolioData.work || [];
+    const resumeCustom = portfolioData.customization?.resume || { layout: 'standard', accentColor: '#1e293b' };
+    const resumeAccent = resumeCustom.accentColor;
 
     // Watermark SVG Pattern
     const watermarkSvg = `
@@ -50,16 +54,22 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
     `;
     const watermarkUrl = `data:image/svg+xml;base64,${btoa(watermarkSvg)}`;
 
+    const workEntries = portfolioData.work || [];
+
+    // Dynamic Styles for PDF
+    const pdfStyles = getStyles(resumeAccent);
+
     return (
         <>
             {/* Download Button */}
             <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${downloading ? 'opacity-60 cursor-wait' : ''} ${buttonStyles} ${className}`}
+                style={{ backgroundColor: variant === 'primary' ? resumeAccent : 'transparent', borderColor: resumeAccent, color: variant === 'primary' ? '#fff' : resumeAccent }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${downloading ? 'opacity-60 cursor-wait' : ''} ${className} ${variant === 'secondary' ? 'border' : ''}`}
             >
                 <FaDownload className={downloading ? 'animate-bounce' : ''} />
-                {downloading ? 'Generating…' : 'Download Resume'}
+                {downloading ? 'Generating…' : 'Download Portfolio Resume'}
             </button>
 
             {/* Hidden Resume Template — rendered off-screen for html2pdf.js */}
@@ -67,7 +77,7 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
                 <div
                     ref={resumeRef}
                     style={{
-                        ...styles.page,
+                        ...pdfStyles.page,
                         position: 'relative',
                         backgroundImage: showWatermark ? `url("${watermarkUrl}")` : 'none',
                         backgroundRepeat: 'repeat'
@@ -75,96 +85,96 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
                 >
 
                     {/* ─── Header ─── */}
-                    <table style={styles.headerTable}>
+                    <table style={pdfStyles.headerTable}>
                         <tbody>
                             <tr>
                                 {portfolioData.profilePic && (
-                                    <td style={styles.profilePicCell}>
+                                    <td style={pdfStyles.profilePicCell}>
                                         <img
                                             src={portfolioData.profilePic}
                                             alt={portfolioData.name}
-                                            style={styles.profilePic}
+                                            style={pdfStyles.profilePic}
                                         />
                                     </td>
                                 )}
-                                <td style={styles.headerLeftCell}>
-                                    <div style={styles.name}>{portfolioData.name || 'Your Name'}</div>
-                                    <div style={styles.title}>{portfolioData.title || 'Professional Title'}</div>
+                                <td style={pdfStyles.headerLeftCell}>
+                                    <div style={pdfStyles.name}>{portfolioData.name || 'Your Name'}</div>
+                                    <div style={pdfStyles.title}>{portfolioData.title || 'Professional Title'}</div>
                                 </td>
-                                <td style={styles.headerRightCell}>
+                                <td style={pdfStyles.headerRightCell}>
                                     {portfolioData.contact?.email && (
-                                        <div style={styles.contactItem}>✉ {portfolioData.contact.email}</div>
+                                        <div style={pdfStyles.contactItem}>✉ {portfolioData.contact.email}</div>
                                     )}
                                     {portfolioData.contact?.phone && (
-                                        <div style={styles.contactItem}>☎ {portfolioData.contact.phone}</div>
+                                        <div style={pdfStyles.contactItem}>☎ {portfolioData.contact.phone}</div>
                                     )}
                                     {portfolioData.contact?.linkedin && (
-                                        <div style={styles.contactItem}>🔗 {portfolioData.contact.linkedin}</div>
+                                        <div style={pdfStyles.contactItem}>🔗 {portfolioData.contact.linkedin}</div>
                                     )}
                                     {portfolioData.contact?.github && (
-                                        <div style={styles.contactItem}>⌨ {portfolioData.contact.github}</div>
+                                        <div style={pdfStyles.contactItem}>⌨ {portfolioData.contact.github}</div>
                                     )}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div style={styles.headerDivider}></div>
+                    <div style={pdfStyles.headerDivider}></div>
 
                     {/* ─── Professional Summary ─── */}
                     {portfolioData.about && (
-                        <div style={styles.section}>
-                            <div style={styles.sectionTitle}>Professional Summary</div>
-                            <div style={styles.text}>{portfolioData.about}</div>
+                        <div style={pdfStyles.section}>
+                            <div style={pdfStyles.sectionTitle}>Professional Summary</div>
+                            <div style={pdfStyles.text}>{portfolioData.about}</div>
                         </div>
                     )}
 
                     {/* ─── Work Experience ─── */}
                     {workEntries.length > 0 && (
-                        <div style={styles.section}>
-                            <div style={styles.sectionTitle}>Work Experience</div>
+                        <div style={pdfStyles.section}>
+                            <div style={pdfStyles.sectionTitle}>Work Experience</div>
                             {workEntries.map((item, idx) => (
                                 <div key={idx}>
-                                    <div style={styles.entry}>
-                                        <table style={styles.entryHeaderTable}>
+                                    <div style={pdfStyles.entry}>
+                                        <table style={pdfStyles.entryHeaderTable}>
                                             <tbody>
                                                 <tr>
-                                                    <td style={styles.entryHeaderLeft}>
-                                                        <div style={styles.entryTitle}>
+                                                    <td style={pdfStyles.entryHeaderLeft}>
+                                                        <div style={pdfStyles.entryTitle}>
                                                             {typeof item === 'string' ? item : (item.company || 'Company')}
                                                         </div>
                                                         {typeof item !== 'string' && (
-                                                            <div style={styles.entrySubtitle}>{item.role || 'Role'}</div>
+                                                            <div style={pdfStyles.entrySubtitle}>{item.role || 'Role'}</div>
                                                         )}
                                                     </td>
                                                     {typeof item !== 'string' && item.date && (
-                                                        <td style={styles.entryHeaderRight}>
-                                                            <span style={styles.dateBadge}>{item.date}</span>
+                                                        <td style={pdfStyles.entryHeaderRight}>
+                                                            <span style={pdfStyles.dateBadge}>{item.date}</span>
                                                         </td>
                                                     )}
                                                 </tr>
                                             </tbody>
                                         </table>
                                         {typeof item !== 'string' && item.responsibilities && (
-                                            <div style={styles.subSection}>
-                                                <div style={styles.subHeading}>Roles & Responsibilities</div>
-                                                <div style={styles.text}>{item.responsibilities}</div>
+                                            <div style={pdfStyles.subSection}>
+                                                <div style={pdfStyles.subHeading}>Roles & Responsibilities</div>
+                                                <div style={pdfStyles.text}>{item.responsibilities}</div>
                                             </div>
                                         )}
                                         {typeof item !== 'string' && item.accomplishments && (
-                                            <div style={styles.subSection}>
-                                                <div style={styles.subHeading}>Work Accomplishments</div>
-                                                <div style={styles.text}>{item.accomplishments}</div>
+                                            <div style={pdfStyles.subSection}>
+                                                <div style={pdfStyles.subHeading}>Work Accomplishments</div>
+                                                <div style={pdfStyles.text}>{item.accomplishments}</div>
                                             </div>
                                         )}
                                         {/* Legacy fallback */}
                                         {typeof item !== 'string' && !item.responsibilities && !item.accomplishments && item.description && (
-                                            <div style={styles.text}>{item.description}</div>
+                                            <div style={pdfStyles.text}>{item.description}</div>
                                         )}
                                     </div>
                                     {/* Divider between work entries */}
                                     {idx < workEntries.length - 1 && (
-                                        <div style={styles.entryDivider}></div>
+                                        <div style={pdfStyles.entryDivider}></div>
                                     )}
                                 </div>
                             ))}
@@ -173,27 +183,27 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
 
                     {/* ─── Education ─── */}
                     {portfolioData.education && portfolioData.education.length > 0 && (
-                        <div style={styles.section}>
-                            <div style={styles.sectionTitle}>Education</div>
+                        <div style={pdfStyles.section}>
+                            <div style={pdfStyles.sectionTitle}>Education</div>
                             {portfolioData.education.map((item, idx) => (
-                                <div key={idx} style={styles.entry}>
-                                    <table style={styles.entryHeaderTable}>
+                                <div key={idx} style={pdfStyles.entry}>
+                                    <table style={pdfStyles.entryHeaderTable}>
                                         <tbody>
                                             <tr>
-                                                <td style={styles.entryHeaderLeft}>
-                                                    <div style={styles.entryTitle}>{item.school || 'School'}</div>
-                                                    <div style={styles.entrySubtitle}>{item.degree || 'Degree'}</div>
+                                                <td style={pdfStyles.entryHeaderLeft}>
+                                                    <div style={pdfStyles.entryTitle}>{item.school || 'School'}</div>
+                                                    <div style={pdfStyles.entrySubtitle}>{item.degree || 'Degree'}</div>
                                                 </td>
                                                 {item.date && (
-                                                    <td style={styles.entryHeaderRight}>
-                                                        <span style={styles.dateBadge}>{item.date}</span>
+                                                    <td style={pdfStyles.entryHeaderRight}>
+                                                        <span style={pdfStyles.dateBadge}>{item.date}</span>
                                                     </td>
                                                 )}
                                             </tr>
                                         </tbody>
                                     </table>
                                     {item.description && (
-                                        <div style={styles.text}>{item.description}</div>
+                                        <div style={pdfStyles.text}>{item.description}</div>
                                     )}
                                 </div>
                             ))}
@@ -202,11 +212,11 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
 
                     {/* ─── Skills ─── */}
                     {portfolioData.skills && portfolioData.skills.length > 0 && (
-                        <div style={styles.section}>
-                            <div style={styles.sectionTitle}>Skills</div>
-                            <div style={styles.skillsGrid}>
+                        <div style={pdfStyles.section}>
+                            <div style={pdfStyles.sectionTitle}>Skills</div>
+                            <div style={pdfStyles.skillsGrid}>
                                 {portfolioData.skills.map((skill, idx) => (
-                                    <span key={idx} style={styles.skillTag}>
+                                    <span key={idx} style={pdfStyles.skillTag}>
                                         {skill.name || skill}
                                     </span>
                                 ))}
@@ -220,22 +230,23 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
 };
 
 /* ─── Inline Styles for PDF Rendering ─── */
-const accentColor = '#4f46e5';
 const textDark = '#1e293b';
 const textMuted = '#475569';
 const borderLight = '#e2e8f0';
 
-const styles = {
+const getStyles = (accentColor) => ({
     page: {
         width: '100%',
         maxWidth: '794px',
         fontFamily: "Arial, Helvetica, sans-serif",
         color: textDark,
         backgroundColor: '#ffffff',
+        padding: '40px',
         lineHeight: '1.55',
         boxSizing: 'border-box',
         wordBreak: 'break-word',
         overflowWrap: 'break-word',
+        borderTop: `8px solid ${accentColor}`,
     },
     /* ── Header (using table for reliable layout) ── */
     headerTable: {
@@ -292,7 +303,7 @@ const styles = {
     },
     headerDivider: {
         height: '3px',
-        background: `linear-gradient(to right, ${accentColor}, #7c3aed)`,
+        background: accentColor,
         borderRadius: '2px',
         margin: '10px 0 16px 0',
     },
@@ -306,7 +317,7 @@ const styles = {
         color: accentColor,
         textTransform: 'uppercase',
         letterSpacing: '1.5px',
-        borderBottom: `2px solid ${borderLight}`,
+        borderBottom: `2px solid ${accentColor}22`,
         paddingBottom: '5px',
         marginBottom: '10px',
     },
@@ -392,12 +403,12 @@ const styles = {
         fontSize: '10px',
         fontWeight: '600',
         color: accentColor,
-        backgroundColor: '#eef2ff',
+        backgroundColor: `${accentColor}11`,
         padding: '4px 12px',
         borderRadius: '14px',
-        border: `1px solid #c7d2fe`,
+        border: `1px solid ${accentColor}33`,
         display: 'inline-block',
     },
-};
+});
 
 export default ResumeDownload;

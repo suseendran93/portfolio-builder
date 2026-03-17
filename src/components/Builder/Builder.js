@@ -5,7 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette } from 'react-icons/fa';
+import Customizer from './Customizer';
+import { savePortfolioForUser } from '../../utils/portfolioStorage';
 
 // Helper: format a date string (YYYY-MM-DD) to DD-MMM-YYYY
 const formatDateDisplay = (dateStr) => {
@@ -26,6 +28,7 @@ const Builder = () => {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [generatedUrl, setGeneratedUrl] = useState('');
     const [generating, setGenerating] = useState(false);
+    const [isCustomizing, setIsCustomizing] = useState(false);
 
     const isPremium = userData?.tier === 'PREMIUM';
 
@@ -43,7 +46,14 @@ const Builder = () => {
         education: [],
         work: [],
         skills: [],
-        contact: { phone: "", email: "", linkedin: "", github: "" }
+        customSlug: "",
+        published: false,
+        publishedAt: null,
+        contact: { phone: "", email: "", linkedin: "", github: "" },
+        customization: {
+            portfolio: { layout: "modern", theme: "light", accentColor: "#4f46e5" },
+            resume: { layout: "standard", theme: "classic", accentColor: "#1e293b" }
+        }
     });
 
 
@@ -112,7 +122,14 @@ const Builder = () => {
                 education: portfolioData.education || [],
                 work: portfolioData.work || [],
                 skills: portfolioData.skills || [],
-                contact: portfolioData.contact || { phone: "", email: "", linkedin: "", github: "" }
+                customSlug: portfolioData.customSlug || "",
+                published: Boolean(portfolioData.published),
+                publishedAt: portfolioData.publishedAt || null,
+                contact: portfolioData.contact || { phone: "", email: "", linkedin: "", github: "" },
+                customization: portfolioData.customization || {
+                    portfolio: { layout: "modern", theme: "light", accentColor: "#4f46e5" },
+                    resume: { layout: "standard", theme: "classic", accentColor: "#1e293b" }
+                }
             });
         }
     }, [portfolioData]);
@@ -138,31 +155,38 @@ const Builder = () => {
     };
 
     const handleUpgradeToPremium = () => {
-        // Stripe integration placeholder
         toast.loading("Redirecting to Stripe Checkout...", { id: 'upgrade-toast' });
-        setTimeout(async () => {
-            try {
-                // Simulate successful payment for now
-                await setDoc(doc(db, "users", currentUser.uid), { ...userData, tier: 'PREMIUM' }, { merge: true });
-                toast.success("Success! You are now a PREMIUM user.", { id: 'upgrade-toast' });
-                setShowUpgradeModal(false);
-                // Redirect to success page to simulate Stripe flow
-                navigate('/success');
-            } catch (err) {
-                console.error("Upgrade Error:", err);
-                toast.error("Failed to upgrade. Please try again.", { id: 'upgrade-toast' });
-            }
-        }, 2000);
+        if (!currentUser) {
+            toast.error("Please log in to upgrade.", { id: 'upgrade-toast' });
+            return;
+        }
+
+        setDoc(
+            doc(db, "users", currentUser.uid),
+            {
+                ...userData,
+                tier: 'PREMIUM',
+                premiumActivatedAt: new Date().toISOString()
+            },
+            { merge: true }
+        ).then(() => {
+            toast.success("Success! You are now a PREMIUM user.", { id: 'upgrade-toast' });
+            setShowUpgradeModal(false);
+            navigate('/success');
+        }).catch((err) => {
+            console.error("Upgrade Error:", err);
+            toast.error("Failed to upgrade. Please try again.", { id: 'upgrade-toast' });
+        });
     };
 
-    const saveToFirestore = async (dataToSave = portfolioData) => {
+    const saveToFirestore = async (dataToSave = portfolioData, { publish = false } = {}) => {
         if (!currentUser) throw new Error("Please log in to save.");
 
         try {
             const cleanData = JSON.parse(JSON.stringify(dataToSave));
             let urlSlug = cleanData.customSlug;
 
-            if (!urlSlug) {
+            if (publish && !urlSlug) {
                 const namePart = (cleanData.name || "user").toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                 const randomPart = Math.floor(1000 + Math.random() * 9000);
                 urlSlug = `${namePart}-${randomPart}`;
@@ -170,8 +194,16 @@ const Builder = () => {
                 updatePortfolioData('customSlug', urlSlug);
             }
 
-            await setDoc(doc(db, "portfolios", currentUser.uid), cleanData);
-            return urlSlug;
+            if (publish) {
+                cleanData.published = true;
+                cleanData.publishedAt = cleanData.publishedAt || new Date().toISOString();
+            }
+
+            await savePortfolioForUser(currentUser.uid, cleanData, userData);
+            return {
+                urlSlug,
+                cleanData
+            };
         } catch (error) {
             console.error("Error saving to Firestore:", error);
             throw error;
@@ -191,7 +223,22 @@ const Builder = () => {
 
         setGenerating(true);
         try {
-            const urlSlug = await saveToFirestore();
+            // Save the latest local data before generating the URL
+            const publishData = {
+                ...localData,
+                published: true,
+                publishedAt: localData.publishedAt || new Date().toISOString()
+            };
+            const { urlSlug, cleanData } = await saveToFirestore(publishData, { publish: true });
+            setLocalData(prev => ({
+                ...prev,
+                customSlug: cleanData.customSlug || "",
+                published: true,
+                publishedAt: cleanData.publishedAt
+            }));
+            updatePortfolioData('customSlug', cleanData.customSlug || "");
+            updatePortfolioData('published', true);
+            updatePortfolioData('publishedAt', cleanData.publishedAt);
             const baseUrl = window.location.href.split('#')[0].replace(/\/$/, "");
             setGeneratedUrl(`${baseUrl}/#/p/${urlSlug}`);
             setShowModal(true);
@@ -320,379 +367,413 @@ const Builder = () => {
                             {tabs.map(tab => (
                                 <button
                                     key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
+                                    onClick={() => {
+                                        setActiveTab(tab.id);
+                                        setIsCustomizing(false);
+                                    }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all
-                                        ${activeTab === tab.id
+                                        ${activeTab === tab.id && !isCustomizing
                                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
                                             : 'text-slate-600 hover:bg-white hover:text-indigo-600'}`}
                                 >
                                     {tab.icon} {tab.label}
                                 </button>
                             ))}
+                            <button
+                                onClick={() => setIsCustomizing(true)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all
+                                    ${isCustomizing
+                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                        : 'text-slate-600 hover:bg-white hover:text-indigo-600'}`}
+                            >
+                                <FaPalette /> Styling
+                            </button>
                         </nav>
                     </div>
 
                     {/* Content Area */}
                     <div className="lg:col-span-9">
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 min-h-[600px]">
+                            {isCustomizing ? (
+                                <Customizer
+                                    localData={localData}
+                                    setLocalData={setLocalData}
+                                    onComplete={() => {
+                                        toast.success("Design preferences saved! You can now preview or publish.");
+                                        setIsCustomizing(false);
+                                    }}
+                                    onBack={() => setIsCustomizing(false)}
+                                />
+                            ) : (
+                                <>
+                                    {/* Profile Tab */}
+                                    {activeTab === 'about' && (
+                                        <div className="space-y-6">
+                                            <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Profile Details</h2>
+                                            <div className="flex-1 space-y-6">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <InputGroup
+                                                        label="Full Name"
+                                                        value={localData.name}
+                                                        onChange={(e) => handleLocalChange('name', e.target.value)}
+                                                        error={showAllErrors ? fieldErrors.name : null}
+                                                    />
+                                                    <InputGroup
+                                                        label="Job Title"
+                                                        value={localData.title}
+                                                        onChange={(e) => handleLocalChange('title', e.target.value)}
+                                                        error={showAllErrors ? fieldErrors.title : null}
+                                                    />
+                                                </div>
 
-                            {/* Profile Tab */}
-                            {activeTab === 'about' && (
-                                <div className="space-y-6">
-                                    <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Profile Details</h2>
-                                    <div className="flex-1 space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <InputGroup
-                                                label="Full Name"
-                                                value={localData.name}
-                                                onChange={(e) => handleLocalChange('name', e.target.value)}
-                                                error={showAllErrors ? fieldErrors.name : null}
-                                            />
-                                            <InputGroup
-                                                label="Job Title"
-                                                value={localData.title}
-                                                onChange={(e) => handleLocalChange('title', e.target.value)}
-                                                error={showAllErrors ? fieldErrors.title : null}
-                                            />
-                                        </div>
-
-                                        <div className="mb-6">
-                                            <label className={`block text-sm font-semibold mb-2 ${showAllErrors && fieldErrors.profilePic ? 'text-red-600' : 'text-slate-700'}`}>Profile Picture</label>
-                                            <div className="flex items-center gap-6">
-                                                <div className={`w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0
+                                                <div className="mb-6">
+                                                    <label className={`block text-sm font-semibold mb-2 ${showAllErrors && fieldErrors.profilePic ? 'text-red-600' : 'text-slate-700'}`}>Profile Picture</label>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className={`w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0
                                                     ${showAllErrors && fieldErrors.profilePic ? 'border-red-300' : 'border-slate-300'}`}>
-                                                    {localData.profilePic ? (
-                                                        <img src={localData.profilePic} alt="Profile" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <FaImage className="text-slate-400 text-2xl" />
-                                                    )}
-                                                </div>
-                                                <div className="flex-1">
-                                                    {localData.profilePic ? (
-                                                        <div className="flex flex-col gap-2">
-                                                            <button
-                                                                onClick={() => handleLocalChange('profilePic', null)}
-                                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-semibold hover:bg-red-100 transition-colors border border-red-100 w-fit"
-                                                            >
-                                                                <FaTrash size={12} />
-                                                            </button>
-
+                                                            {localData.profilePic ? (
+                                                                <img src={localData.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <FaImage className="text-slate-400 text-2xl" />
+                                                            )}
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            <input
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={handleImageUpload}
-                                                                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                                            />
-                                                            <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
-                                                        </>
+                                                        <div className="flex-1">
+                                                            {localData.profilePic ? (
+                                                                <div className="flex flex-col gap-2">
+                                                                    <button
+                                                                        onClick={() => handleLocalChange('profilePic', null)}
+                                                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-semibold hover:bg-red-100 transition-colors border border-red-100 w-fit"
+                                                                    >
+                                                                        <FaTrash size={12} />
+                                                                    </button>
+
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <input
+                                                                        type="file"
+                                                                        accept="image/*"
+                                                                        onChange={handleImageUpload}
+                                                                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                                                    />
+                                                                    <p className="mt-1 text-xs text-slate-500">Recommended: Square JPG or PNG, max 2MB.</p>
+                                                                </>
+                                                            )}
+                                                            {showAllErrors && fieldErrors.profilePic && (
+                                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.profilePic}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <InputGroup
+                                                    label="Bio / About Me"
+                                                    value={localData.about}
+                                                    onChange={(e) => handleLocalChange('about', e.target.value)}
+                                                    as="textarea"
+                                                    rows={6}
+                                                    error={showAllErrors ? fieldErrors.about : null}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Education Tab */}
+                                    {activeTab === 'education' && (
+                                        <div className="space-y-6">
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-slate-900">Education</h2>
+                                                    {showAllErrors && fieldErrors.education && (
+                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.education}</p>
                                                     )}
-                                                    {showAllErrors && fieldErrors.profilePic && (
-                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.profilePic}</p>
-                                                    )}
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <InputGroup
-                                            label="Bio / About Me"
-                                            value={localData.about}
-                                            onChange={(e) => handleLocalChange('about', e.target.value)}
-                                            as="textarea"
-                                            rows={6}
-                                            error={showAllErrors ? fieldErrors.about : null}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Education Tab */}
-                            {activeTab === 'education' && (
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-slate-900">Education</h2>
-                                            {showAllErrors && fieldErrors.education && (
-                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.education}</p>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={() => handleLocalChange('education', [...localData.education, { degree: "", school: "", startDate: "", endDate: "", description: "" }])}
-                                            className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
-                                        >
-                                            <FaPlus /> Add New
-                                        </button>
-                                    </div>
-
-                                    {localData.education.map((edu, index) => (
-                                        <div key={index} className="bg-slate-50 rounded-xl p-6 border border-slate-200 relative group">
-                                            <button
-                                                onClick={() => {
-                                                    const newEdu = localData.education.filter((_, i) => i !== index);
-                                                    handleLocalChange('education', newEdu);
-                                                }}
-                                                className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors p-2"
-                                            >
-                                                <FaTrash size={14} />
-                                            </button>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                <InputGroup
-                                                    label="Degree"
-                                                    value={edu.degree || ''}
-                                                    onChange={(e) => {
-                                                        const newEdu = [...localData.education];
-                                                        newEdu[index] = { ...newEdu[index], degree: e.target.value };
-                                                        handleLocalChange('education', newEdu);
-                                                    }}
-                                                    error={showAllErrors ? (edu.degree ? null : "Required") : null}
-                                                />
-                                                <InputGroup
-                                                    label="School / University"
-                                                    value={edu.school || ''}
-                                                    onChange={(e) => {
-                                                        const newEdu = [...localData.education];
-                                                        newEdu[index] = { ...newEdu[index], school: e.target.value };
-                                                        handleLocalChange('education', newEdu);
-                                                    }}
-                                                    error={showAllErrors ? (edu.school ? null : "Required") : null}
-                                                />
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
-                                                    <input
-                                                        type="date"
-                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
-                                                        value={edu.startDate || ''}
-                                                        onChange={(e) => {
-                                                            const newEdu = [...localData.education];
-                                                            newEdu[index] = { ...newEdu[index], startDate: e.target.value, date: `${formatDateDisplay(e.target.value)} – ${formatDateDisplay(newEdu[index].endDate)}` };
-                                                            handleLocalChange('education', newEdu);
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
-                                                    <input
-                                                        type="date"
-                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
-                                                        value={edu.endDate || ''}
-                                                        onChange={(e) => {
-                                                            const newEdu = [...localData.education];
-                                                            newEdu[index] = { ...newEdu[index], endDate: e.target.value, date: `${formatDateDisplay(newEdu[index].startDate)} – ${formatDateDisplay(e.target.value)}` };
-                                                            handleLocalChange('education', newEdu);
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <InputGroup label="Description" value={edu.description || ''} as="textarea" rows={2}
-                                                onChange={(e) => {
-                                                    const newEdu = [...localData.education];
-                                                    newEdu[index] = { ...newEdu[index], description: e.target.value };
-                                                    handleLocalChange('education', newEdu);
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Work Tab */}
-                            {activeTab === 'work' && (
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-slate-900">Work Experience</h2>
-                                            {showAllErrors && fieldErrors.work && (
-                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.work}</p>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={() => handleLocalChange('work', [...localData.work, { company: "", role: "", startDate: "", endDate: "", responsibilities: "", accomplishments: "" }])}
-                                            className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
-                                        >
-                                            <FaPlus /> Add New
-                                        </button>
-                                    </div>
-
-                                    {localData.work.map((wk, index) => (
-                                        <div key={index} className="bg-slate-50 rounded-xl p-6 border border-slate-200 relative group">
-                                            <button
-                                                onClick={() => {
-                                                    const newWork = localData.work.filter((_, i) => i !== index);
-                                                    handleLocalChange('work', newWork);
-                                                }}
-                                                className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors p-2"
-                                            >
-                                                <FaTrash size={14} />
-                                            </button>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                <InputGroup
-                                                    label="Company"
-                                                    value={wk.company || ''}
-                                                    onChange={(e) => {
-                                                        const newWork = [...localData.work];
-                                                        newWork[index] = { ...newWork[index], company: e.target.value };
-                                                        handleLocalChange('work', newWork);
-                                                    }}
-                                                    error={showAllErrors ? (wk.company ? null : "Required") : null}
-                                                />
-                                                <InputGroup
-                                                    label="Role / Position"
-                                                    value={wk.role || ''}
-                                                    onChange={(e) => {
-                                                        const newWork = [...localData.work];
-                                                        newWork[index] = { ...newWork[index], role: e.target.value };
-                                                        handleLocalChange('work', newWork);
-                                                    }}
-                                                    error={showAllErrors ? (wk.role ? null : "Required") : null}
-                                                />
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
-                                                    <input
-                                                        type="date"
-                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
-                                                        value={wk.startDate || ''}
-                                                        onChange={(e) => {
-                                                            const newWork = [...localData.work];
-                                                            newWork[index] = { ...newWork[index], startDate: e.target.value, date: `${formatDateDisplay(e.target.value)} – ${formatDateDisplay(newWork[index].endDate)}` };
-                                                            handleLocalChange('work', newWork);
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
-                                                    <input
-                                                        type="date"
-                                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
-                                                        value={wk.endDate || ''}
-                                                        onChange={(e) => {
-                                                            const newWork = [...localData.work];
-                                                            newWork[index] = { ...newWork[index], endDate: e.target.value, date: `${formatDateDisplay(newWork[index].startDate)} – ${formatDateDisplay(e.target.value)}` };
-                                                            handleLocalChange('work', newWork);
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <InputGroup label="Roles & Responsibilities" value={wk.responsibilities || ''} as="textarea" rows={3}
-                                                onChange={(e) => {
-                                                    const newWork = [...localData.work];
-                                                    newWork[index] = { ...newWork[index], responsibilities: e.target.value };
-                                                    handleLocalChange('work', newWork);
-                                                }}
-                                            />
-                                            <InputGroup label="Work Accomplishments" value={wk.accomplishments || ''} as="textarea" rows={3}
-                                                onChange={(e) => {
-                                                    const newWork = [...localData.work];
-                                                    newWork[index] = { ...newWork[index], accomplishments: e.target.value };
-                                                    handleLocalChange('work', newWork);
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Skills Tab */}
-                            {activeTab === 'skills' && (
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-slate-900">Skills</h2>
-                                            {showAllErrors && fieldErrors.skills && (
-                                                <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.skills}</p>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={() => handleLocalChange('skills', [...localData.skills, { name: "New Skill", percent: 50 }])}
-                                            className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
-                                        >
-                                            <FaPlus /> Add New
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {localData.skills.map((skill, index) => (
-                                            <div key={index} className="bg-slate-50 p-4 rounded-xl border border-slate-200 relative">
                                                 <button
-                                                    onClick={() => {
-                                                        const newSkills = localData.skills.filter((_, i) => i !== index);
-                                                        handleLocalChange('skills', newSkills);
-                                                    }}
-                                                    className="absolute top-2 right-2 text-slate-400 hover:text-red-500 p-1"
+                                                    onClick={() => handleLocalChange('education', [...localData.education, { degree: "", school: "", startDate: "", endDate: "", description: "" }])}
+                                                    className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
                                                 >
-                                                    <FaTrash size={12} />
+                                                    <FaPlus /> Add New
                                                 </button>
-
-                                                <div className="mt-2 space-y-3">
-                                                    <div>
-                                                        <label className="text-xs font-semibold text-slate-500 uppercase">Skill Name</label>
-                                                        <input
-                                                            type="text"
-                                                            className={`w-full bg-white border rounded px-2 py-1 text-sm mt-1 focus:ring-1 focus:ring-indigo-500 outline-none
-                                                                ${showAllErrors && !skill.name?.trim() ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300'}`}
-                                                            value={skill.name || ''}
-                                                            onChange={(e) => {
-                                                                const newSkills = [...localData.skills];
-                                                                newSkills[index] = { ...newSkills[index], name: e.target.value };
-                                                                handleLocalChange('skills', newSkills);
-                                                            }}
-                                                        />
-                                                        {showAllErrors && !skill.name?.trim() && (
-                                                            <p className="text-red-500 text-[10px] mt-0.5">Required</p>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-xs font-semibold text-slate-500 uppercase flex justify-between">
-                                                            <span>Proficiency</span>
-                                                            <span>{skill.percent}%</span>
-                                                        </label>
-                                                        <input
-                                                            type="range"
-                                                            min="0" max="100"
-                                                            className="w-full mt-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                                                            value={skill.percent || 0}
-                                                            onChange={(e) => {
-                                                                const newSkills = [...localData.skills];
-                                                                newSkills[index] = { ...newSkills[index], percent: e.target.value };
-                                                                handleLocalChange('skills', newSkills);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
+
+                                            {localData.education.map((edu, index) => (
+                                                <div key={index} className="bg-slate-50 rounded-xl p-6 border border-slate-200 relative group">
+                                                    <button
+                                                        onClick={() => {
+                                                            const newEdu = localData.education.filter((_, i) => i !== index);
+                                                            handleLocalChange('education', newEdu);
+                                                        }}
+                                                        className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors p-2"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <InputGroup
+                                                            label="Degree"
+                                                            value={edu.degree || ''}
+                                                            onChange={(e) => {
+                                                                const newEdu = [...localData.education];
+                                                                newEdu[index] = { ...newEdu[index], degree: e.target.value };
+                                                                handleLocalChange('education', newEdu);
+                                                            }}
+                                                            error={showAllErrors ? (edu.degree ? null : "Required") : null}
+                                                        />
+                                                        <InputGroup
+                                                            label="School / University"
+                                                            value={edu.school || ''}
+                                                            onChange={(e) => {
+                                                                const newEdu = [...localData.education];
+                                                                newEdu[index] = { ...newEdu[index], school: e.target.value };
+                                                                handleLocalChange('education', newEdu);
+                                                            }}
+                                                            error={showAllErrors ? (edu.school ? null : "Required") : null}
+                                                        />
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                value={edu.startDate || ''}
+                                                                onChange={(e) => {
+                                                                    const newEdu = [...localData.education];
+                                                                    newEdu[index] = { ...newEdu[index], startDate: e.target.value, date: `${formatDateDisplay(e.target.value)} – ${formatDateDisplay(newEdu[index].endDate)}` };
+                                                                    handleLocalChange('education', newEdu);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                value={edu.endDate || ''}
+                                                                onChange={(e) => {
+                                                                    const newEdu = [...localData.education];
+                                                                    newEdu[index] = { ...newEdu[index], endDate: e.target.value, date: `${formatDateDisplay(newEdu[index].startDate)} – ${formatDateDisplay(e.target.value)}` };
+                                                                    handleLocalChange('education', newEdu);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <InputGroup label="Description" value={edu.description || ''} as="textarea" rows={2}
+                                                        onChange={(e) => {
+                                                            const newEdu = [...localData.education];
+                                                            newEdu[index] = { ...newEdu[index], description: e.target.value };
+                                                            handleLocalChange('education', newEdu);
+                                                        }}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Work Tab */}
+                                    {activeTab === 'work' && (
+                                        <div className="space-y-6">
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-slate-900">Work Experience</h2>
+                                                    {showAllErrors && fieldErrors.work && (
+                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.work}</p>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => handleLocalChange('work', [...localData.work, { company: "", role: "", startDate: "", endDate: "", responsibilities: "", accomplishments: "" }])}
+                                                    className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                                                >
+                                                    <FaPlus /> Add New
+                                                </button>
+                                            </div>
+
+                                            {localData.work.map((wk, index) => (
+                                                <div key={index} className="bg-slate-50 rounded-xl p-6 border border-slate-200 relative group">
+                                                    <button
+                                                        onClick={() => {
+                                                            const newWork = localData.work.filter((_, i) => i !== index);
+                                                            handleLocalChange('work', newWork);
+                                                        }}
+                                                        className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors p-2"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <InputGroup
+                                                            label="Company"
+                                                            value={wk.company || ''}
+                                                            onChange={(e) => {
+                                                                const newWork = [...localData.work];
+                                                                newWork[index] = { ...newWork[index], company: e.target.value };
+                                                                handleLocalChange('work', newWork);
+                                                            }}
+                                                            error={showAllErrors ? (wk.company ? null : "Required") : null}
+                                                        />
+                                                        <InputGroup
+                                                            label="Role / Position"
+                                                            value={wk.role || ''}
+                                                            onChange={(e) => {
+                                                                const newWork = [...localData.work];
+                                                                newWork[index] = { ...newWork[index], role: e.target.value };
+                                                                handleLocalChange('work', newWork);
+                                                            }}
+                                                            error={showAllErrors ? (wk.role ? null : "Required") : null}
+                                                        />
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Start Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                value={wk.startDate || ''}
+                                                                onChange={(e) => {
+                                                                    const newWork = [...localData.work];
+                                                                    newWork[index] = { ...newWork[index], startDate: e.target.value, date: `${formatDateDisplay(e.target.value)} – ${formatDateDisplay(newWork[index].endDate)}` };
+                                                                    handleLocalChange('work', newWork);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-slate-700 mb-2">End Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-slate-900 bg-white"
+                                                                value={wk.endDate || ''}
+                                                                onChange={(e) => {
+                                                                    const newWork = [...localData.work];
+                                                                    newWork[index] = { ...newWork[index], endDate: e.target.value, date: `${formatDateDisplay(newWork[index].startDate)} – ${formatDateDisplay(e.target.value)}` };
+                                                                    handleLocalChange('work', newWork);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <InputGroup label="Roles & Responsibilities" value={wk.responsibilities || ''} as="textarea" rows={3}
+                                                        onChange={(e) => {
+                                                            const newWork = [...localData.work];
+                                                            newWork[index] = { ...newWork[index], responsibilities: e.target.value };
+                                                            handleLocalChange('work', newWork);
+                                                        }}
+                                                    />
+                                                    <InputGroup label="Work Accomplishments" value={wk.accomplishments || ''} as="textarea" rows={3}
+                                                        onChange={(e) => {
+                                                            const newWork = [...localData.work];
+                                                            newWork[index] = { ...newWork[index], accomplishments: e.target.value };
+                                                            handleLocalChange('work', newWork);
+                                                        }}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Skills Tab */}
+                                    {activeTab === 'skills' && (
+                                        <div className="space-y-6">
+                                            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-slate-900">Skills</h2>
+                                                    {showAllErrors && fieldErrors.skills && (
+                                                        <p className="text-red-500 text-xs mt-1 font-medium">{fieldErrors.skills}</p>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => handleLocalChange('skills', [...localData.skills, { name: "New Skill", percent: 50 }])}
+                                                    className="text-sm flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                                                >
+                                                    <FaPlus /> Add New
+                                                </button>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {localData.skills.map((skill, index) => (
+                                                    <div key={index} className="bg-slate-50 p-4 rounded-xl border border-slate-200 relative">
+                                                        <button
+                                                            onClick={() => {
+                                                                const newSkills = localData.skills.filter((_, i) => i !== index);
+                                                                handleLocalChange('skills', newSkills);
+                                                            }}
+                                                            className="absolute top-2 right-2 text-slate-400 hover:text-red-500 p-1"
+                                                        >
+                                                            <FaTrash size={12} />
+                                                        </button>
+
+                                                        <div className="mt-2 space-y-3">
+                                                            <div>
+                                                                <label className="text-xs font-semibold text-slate-500 uppercase">Skill Name</label>
+                                                                <input
+                                                                    type="text"
+                                                                    className={`w-full bg-white border rounded px-2 py-1 text-sm mt-1 focus:ring-1 focus:ring-indigo-500 outline-none
+                                                                ${showAllErrors && !skill.name?.trim() ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300'}`}
+                                                                    value={skill.name || ''}
+                                                                    onChange={(e) => {
+                                                                        const newSkills = [...localData.skills];
+                                                                        newSkills[index] = { ...newSkills[index], name: e.target.value };
+                                                                        handleLocalChange('skills', newSkills);
+                                                                    }}
+                                                                />
+                                                                {showAllErrors && !skill.name?.trim() && (
+                                                                    <p className="text-red-500 text-[10px] mt-0.5">Required</p>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-xs font-semibold text-slate-500 uppercase flex justify-between">
+                                                                    <span>Proficiency</span>
+                                                                    <span>{skill.percent}%</span>
+                                                                </label>
+                                                                <input
+                                                                    type="range"
+                                                                    min="0" max="100"
+                                                                    className="w-full mt-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                                                    value={skill.percent || 0}
+                                                                    onChange={(e) => {
+                                                                        const newSkills = [...localData.skills];
+                                                                        newSkills[index] = { ...newSkills[index], percent: e.target.value };
+                                                                        handleLocalChange('skills', newSkills);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Contact Tab */}
+                                    {activeTab === 'contact' && (
+                                        <div className="space-y-6">
+                                            <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Contact Information</h2>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <InputGroup
+                                                    label="Phone Number"
+                                                    value={localData.contact.phone || ''}
+                                                    onChange={(e) => handleLocalChange('contact', { ...localData.contact, phone: e.target.value })}
+                                                    error={showAllErrors ? fieldErrors.phone : null}
+                                                />
+                                                <InputGroup
+                                                    label="Email Address"
+                                                    type="email"
+                                                    value={localData.contact.email || ''}
+                                                    onChange={(e) => handleLocalChange('contact', { ...localData.contact, email: e.target.value })}
+                                                    error={showAllErrors ? fieldErrors.email : null}
+                                                />
+                                                <InputGroup label="LinkedIn URL" value={localData.contact.linkedin || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, linkedin: e.target.value })} />
+                                                <InputGroup label="GitHub URL" value={localData.contact.github || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })} />
+                                            </div>
+
+                                            <div className="mt-12 flex justify-end">
+                                                <button
+                                                    onClick={() => setIsCustomizing(true)}
+                                                    className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                                                >
+                                                    Next: Customize Style <FaPalette />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </>
                             )}
-
-                            {/* Contact Tab */}
-                            {activeTab === 'contact' && (
-                                <div className="space-y-6">
-                                    <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 mb-6">Contact Information</h2>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <InputGroup
-                                            label="Phone Number"
-                                            value={localData.contact.phone || ''}
-                                            onChange={(e) => handleLocalChange('contact', { ...localData.contact, phone: e.target.value })}
-                                            error={showAllErrors ? fieldErrors.phone : null}
-                                        />
-                                        <InputGroup
-                                            label="Email Address"
-                                            type="email"
-                                            value={localData.contact.email || ''}
-                                            onChange={(e) => handleLocalChange('contact', { ...localData.contact, email: e.target.value })}
-                                            error={showAllErrors ? fieldErrors.email : null}
-                                        />
-                                        <InputGroup label="LinkedIn URL" value={localData.contact.linkedin || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, linkedin: e.target.value })} />
-                                        <InputGroup label="GitHub URL" value={localData.contact.github || ''} onChange={(e) => handleLocalChange('contact', { ...localData.contact, github: e.target.value })} />
-                                    </div>
-                                </div>
-                            )}
-
                         </div>
                     </div>
                 </div>

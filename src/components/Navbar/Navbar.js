@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { PortfolioContext } from "../../context/PortfolioContext";
 
 const NavbarHeader = ({ scrollToSection, refs }) => {
+  const { portfolioData } = useContext(PortfolioContext);
+  const customization = portfolioData.customization?.portfolio || { theme: 'light', accentColor: '#4f46e5' };
+  const { theme, accentColor } = customization;
+  const isDark = theme === 'dark' || theme === 'royal';
+
   const { education, skills, work, contact } = refs || {};
   const [isOpen, setIsOpen] = useState(false);
 
@@ -18,7 +24,8 @@ const NavbarHeader = ({ scrollToSection, refs }) => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm z-50 transition-all duration-300">
+    <nav className={`fixed top-0 left-0 right-0 border-b shadow-sm z-50 transition-all duration-300 ${theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : theme === 'royal' ? 'bg-indigo-950/90 border-indigo-900' : 'bg-white/90 border-slate-200'
+      } backdrop-blur-md`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Brand/Logo (Optional, could add one later) */}
         <div className="font-bold text-xl text-slate-800">
@@ -31,8 +38,14 @@ const NavbarHeader = ({ scrollToSection, refs }) => {
             <button
               key={item.name}
               onClick={() => handleNavClick(item.ref)}
-              className="font-medium text-slate-600 hover:text-indigo-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-base"
+              style={{ '--hover-color': accentColor }}
+              className={`font-medium transition-colors cursor-pointer bg-transparent border-none p-0 text-base
+                ${isDark ? 'text-slate-300 hover:text-[var(--hover-color)]' : 'text-slate-600 hover:text-indigo-600'}`}
             >
+              <style dangerouslySetInnerHTML={{
+                __html: `
+                button:hover { color: ${accentColor} !important; }
+              `}} />
               {item.name}
             </button>
           ))}

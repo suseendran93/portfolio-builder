@@ -1,11 +1,10 @@
 import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { useAuth } from './AuthContext';
-import { db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { loadPortfolioForUser } from '../utils/portfolioStorage';
 
 export const PortfolioContext = createContext();
 
-const initialState = {
+const getInitialState = () => ({
   about: "",
   name: "",
   title: "",
@@ -13,40 +12,58 @@ const initialState = {
   work: [],
   education: [],
   skills: [],
+  customSlug: "",
+  published: false,
+  publishedAt: null,
   contact: {
     phone: "",
     email: "",
     github: "",
     linkedin: ""
+  },
+  customization: {
+    portfolio: {
+      layout: "modern",
+      theme: "light",
+      accentColor: "#4f46e5"
+    },
+    resume: {
+      layout: "standard",
+      theme: "classic",
+      accentColor: "#1e293b"
+    }
   }
-};
+});
 
 export const PortfolioProvider = ({ children }) => {
   const { currentUser } = useAuth();
-  const [portfolioData, setPortfolioData] = useState(initialState);
+  const [portfolioData, setPortfolioData] = useState(getInitialState());
 
   // Fetch data when user logs in or changes
   useEffect(() => {
-    const fetchData = async () => {
+        const fetchData = async () => {
       if (currentUser) {
+        console.log("PortfolioContext: Fetching data for user:", currentUser.uid);
         try {
-          const docRef = doc(db, "portfolios", currentUser.uid);
-          const docSnap = await getDoc(docRef);
+          const storedPortfolio = await loadPortfolioForUser(currentUser.uid);
 
-          if (docSnap.exists()) {
-            console.log("PortfolioContext: Loaded user data");
-            setPortfolioData(docSnap.data());
+          if (storedPortfolio) {
+            console.log("PortfolioContext: Loaded portfolio data from Firestore");
+            setPortfolioData(prev => ({
+              ...prev,
+              ...storedPortfolio
+            }));
           } else {
-            console.log("PortfolioContext: No existing data, using empty state");
-            setPortfolioData(initialState);
+            console.log("PortfolioContext: No existing data in Firestore, using empty state");
+            setPortfolioData(getInitialState());
           }
         } catch (error) {
-          console.error("Error fetching portfolio data:", error);
+          console.error("PortfolioContext: Error fetching portfolio data:", error);
         }
       } else {
         // User is logged out, reset state
         console.log("PortfolioContext: User logged out, clearing state");
-        setPortfolioData(initialState);
+        setPortfolioData(getInitialState());
       }
     };
 

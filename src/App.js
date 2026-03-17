@@ -5,6 +5,7 @@ import { PortfolioProvider } from "./context/PortfolioContext";
 import Login from "./components/Login/Login";
 import Builder from "./components/Builder/Builder";
 import PortfolioView from "./pages/PortfolioView";
+import PublicPortfolioView from "./pages/PublicPortfolioView";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
 import Signup from "./components/Signup/Signup";
@@ -25,7 +26,7 @@ const App = () => {
         <Toaster position="top-right" />
         <Routes>
           {/* Public Route FIRST to ensure priority */}
-          <Route path="/p/:slug" element={<PortfolioView publicMode={true} />} />
+          <Route path="/p/:slug" element={<PublicPortfolioView />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
           <Route path="*" element={<Navigate to="/" />} />

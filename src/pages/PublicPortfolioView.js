@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
 import { PortfolioContext } from '../context/PortfolioContext';
 import PortfolioView from './PortfolioView';
+import { loadPublicPortfolioBySlug } from '../utils/portfolioStorage';
 
 const PublicPortfolioView = () => {
-    const { userId } = useParams();
+    const { slug } = useParams();
     const [portfolioData, setPortfolioData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -18,38 +17,14 @@ const PublicPortfolioView = () => {
 
     useEffect(() => {
         const fetchPortfolio = async () => {
-            if (!userId) {
+            if (!slug) {
                 setError("Invalid URL.");
                 setLoading(false);
                 return;
             }
 
             try {
-                // STRATEGY: 
-                // 1. Assume 'userId' param is a Custom Slug -> Attempt Query
-                // 2. If no result -> Assume 'userId' is a raw Doc ID -> Attempt Direct Fetch
-
-                let foundData = null;
-
-                // Step 1: Query by customSlug
-                const q = query(collection(db, "portfolios"), where("customSlug", "==", userId));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    // Match found by slug!
-                    foundData = querySnapshot.docs[0].data();
-                    console.log("Found portfolio by Slug lookup.");
-                } else {
-                    // Step 2: Fallback to Direct ID fetch (Legacy support or if slug == uid)
-                    console.log("Slug lookup failed. Trying direct Doc ID lookup...");
-                    const docRef = doc(db, "portfolios", userId);
-                    const docSnap = await getDoc(docRef);
-
-                    if (docSnap.exists()) {
-                        foundData = docSnap.data();
-                        console.log("Found portfolio by Direct ID lookup.");
-                    }
-                }
+                const foundData = await loadPublicPortfolioBySlug(slug);
 
                 if (foundData) {
                     setPortfolioData(foundData);
@@ -66,7 +41,7 @@ const PublicPortfolioView = () => {
         };
 
         fetchPortfolio();
-    }, [userId]);
+    }, [slug]);
 
     if (loading) {
         return (

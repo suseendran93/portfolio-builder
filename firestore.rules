@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow create, read, update: if isOwner(userId);
+    }
+
+    match /portfolios/{userId} {
+      allow create, update, delete: if isOwner(userId);
+      allow read: if isOwner(userId) || (
+        resource != null &&
+        resource.data.published == true &&
+        resource.data.customSlug is string &&
+        resource.data.customSlug.size() > 0
+      );
+    }
+  }
+}
