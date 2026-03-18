@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>BuildFolio</title>
+  <script>
+    (function (location) {
+      var isGithubPages = /\.github\.io$/i.test(location.hostname);
+      var pathSegmentsToKeep = isGithubPages ? 1 : 0;
+      var pathnameSegments = location.pathname.split('/').filter(Boolean);
+      var baseSegments = pathnameSegments.slice(0, pathSegmentsToKeep);
+      var routeSegments = pathnameSegments.slice(pathSegmentsToKeep);
+      var basePath = '/' + baseSegments.join('/');
+      var routePath = routeSegments.join('/').replace(/&/g, '~and~');
+      var search = location.search ? location.search.slice(1).replace(/&/g, '~and~') : '';
+      var redirectUrl =
+        location.protocol + '//' + location.host +
+        (basePath === '/' ? '' : basePath) +
+        '/?/' + routePath +
+        (search ? '&' + search : '') +
+        location.hash;
+
+      location.replace(redirectUrl);
+    }(window.location));
+  </script>
+</head>
+
+<body>
+</body>
+
+</html>
