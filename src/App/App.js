@@ -11,6 +11,8 @@ import Cancel from "../pages/Cancel/Cancel";
 import Signup from "../components/Signup/Signup";
 import { useAuth } from "../context/AuthContext";
 import NotFound from "../pages/NotFound/NotFound";
+import Privacy from "../pages/Privacy/Privacy";
+import Help from "../pages/Help/Help";
 import { Toaster } from "react-hot-toast";
 
 const PrivateRoute = ({ children }) => {
@@ -27,6 +29,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/help" element={<Help />} />
           <Route path="/p/:slug" element={<PublicPortfolioView />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />

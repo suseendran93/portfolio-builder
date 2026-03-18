@@ -192,8 +192,11 @@ const Customizer = ({ localData, setLocalData, onComplete, onBack }) => {
                     {/* Resume Layouts */}
                     <section className="customizer__section">
                         <h3 className="customizer__section-title">
-                            <FaFileAlt className="customizer__section-icon" /> Choose Resume Layout
+                            <FaFileAlt className="customizer__section-icon" /> Choose ATS-Friendly Resume Template
                         </h3>
+                        <p className="customizer__color-help">
+                            These templates stay simple on purpose so exported PDFs remain cleaner for recruiters and applicant tracking systems.
+                        </p>
                         <div className="customizer__option-grid">
                             {RESUME_LAYOUT_OPTIONS.map(layout => (
                                 <button

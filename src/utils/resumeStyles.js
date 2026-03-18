@@ -5,6 +5,12 @@ const textMuted = '#475569';
 const borderLight = '#e2e8f0';
 
 export const getResumeStyles = (accentColor, layout = DEFAULT_RESUME_CUSTOMIZATION.layout) => {
+  const normalizedLayout = {
+    standard: 'ats-classic',
+    executive: 'ats-structured',
+    minimal: 'ats-compact',
+  }[layout] || layout;
+
   const baseStyles = {
     page: {
       width: '100%',
@@ -167,108 +173,112 @@ export const getResumeStyles = (accentColor, layout = DEFAULT_RESUME_CUSTOMIZATI
     skillTag: {
       fontSize: '10px',
       fontWeight: '600',
+      lineHeight: '1.2',
       color: accentColor,
       backgroundColor: `${accentColor}11`,
       padding: '4px 12px',
       borderRadius: '14px',
       border: `1px solid ${accentColor}33`,
       display: 'inline-block',
+      textAlign: 'center',
+      verticalAlign: 'middle',
+      whiteSpace: 'nowrap',
     },
   };
 
-  if (layout === 'executive') {
+  if (normalizedLayout === 'ats-structured') {
     return {
       ...baseStyles,
       page: {
         ...baseStyles.page,
-        padding: '44px',
-        borderTop: `14px solid ${accentColor}`,
+        padding: '42px',
+        borderTop: `10px solid ${accentColor}`,
       },
       profilePic: {
         ...baseStyles.profilePic,
-        borderRadius: '20px',
-        width: '76px',
-        height: '76px',
-        boxShadow: `0 8px 20px ${accentColor}22`,
+        borderRadius: '12px',
+        width: '74px',
+        height: '74px',
+        boxShadow: 'none',
       },
       name: {
         ...baseStyles.name,
-        fontSize: '28px',
+        fontSize: '27px',
         letterSpacing: '-0.6px',
       },
       title: {
         ...baseStyles.title,
         textTransform: 'uppercase',
-        letterSpacing: '1.2px',
+        letterSpacing: '0.9px',
       },
       headerDivider: {
         ...baseStyles.headerDivider,
-        height: '5px',
-        borderRadius: '999px',
-        margin: '14px 0 22px 0',
+        height: '3px',
+        borderRadius: '2px',
+        margin: '12px 0 20px 0',
       },
       sectionTitle: {
         ...baseStyles.sectionTitle,
-        letterSpacing: '2px',
-        borderBottom: `3px solid ${accentColor}`,
-        paddingBottom: '7px',
-        marginBottom: '14px',
+        letterSpacing: '1.8px',
+        borderBottom: `2px solid ${accentColor}44`,
+        paddingBottom: '6px',
+        marginBottom: '12px',
       },
       entry: {
         ...baseStyles.entry,
-        paddingLeft: '14px',
-        borderLeft: `4px solid ${accentColor}55`,
+        paddingLeft: '12px',
+        borderLeft: `2px solid ${accentColor}33`,
       },
       entrySubtitle: {
         ...baseStyles.entrySubtitle,
         fontSize: '11px',
         textTransform: 'uppercase',
-        letterSpacing: '0.8px',
+        letterSpacing: '0.5px',
       },
       dateBadge: {
         ...baseStyles.dateBadge,
-        color: '#ffffff',
-        backgroundColor: accentColor,
-        borderRadius: '999px',
+        color: textDark,
+        backgroundColor: `${accentColor}14`,
+        borderRadius: '6px',
       },
       skillTag: {
         ...baseStyles.skillTag,
-        color: '#ffffff',
-        backgroundColor: accentColor,
-        border: `1px solid ${accentColor}`,
-        borderRadius: '999px',
-        padding: '5px 12px',
+        color: textDark,
+        backgroundColor: '#ffffff',
+        border: `1px solid ${accentColor}44`,
+        borderRadius: '8px',
+        padding: '4px 10px',
       },
     };
   }
 
-  if (layout === 'minimal') {
+  if (normalizedLayout === 'ats-compact') {
     return {
       ...baseStyles,
       page: {
         ...baseStyles.page,
-        padding: '36px',
-        borderTop: `2px solid ${accentColor}55`,
+        padding: '32px',
+        borderTop: `2px solid ${accentColor}44`,
       },
       profilePic: {
         ...baseStyles.profilePic,
-        borderRadius: '14px',
+        borderRadius: '8px',
         border: `1px solid ${accentColor}33`,
       },
       title: {
         ...baseStyles.title,
         color: textMuted,
-        letterSpacing: '0.1px',
+        letterSpacing: '0',
       },
       headerDivider: {
         ...baseStyles.headerDivider,
         height: '1px',
-        background: `${accentColor}44`,
-        margin: '12px 0 14px 0',
+        background: `${accentColor}22`,
+        margin: '10px 0 14px 0',
       },
       section: {
         ...baseStyles.section,
-        marginBottom: '14px',
+        marginBottom: '12px',
       },
       sectionTitle: {
         ...baseStyles.sectionTitle,
@@ -277,37 +287,43 @@ export const getResumeStyles = (accentColor, layout = DEFAULT_RESUME_CUSTOMIZATI
         letterSpacing: '1px',
         borderBottom: 'none',
         paddingBottom: '0',
-        marginBottom: '8px',
+        marginBottom: '7px',
       },
       entry: {
         ...baseStyles.entry,
         paddingLeft: '0',
         borderLeft: 'none',
-        marginBottom: '8px',
+        marginBottom: '7px',
       },
       dateBadge: {
         ...baseStyles.dateBadge,
         backgroundColor: 'transparent',
         borderRadius: '0',
         padding: '0',
-        color: accentColor,
+        color: textMuted,
       },
       subHeading: {
         ...baseStyles.subHeading,
-        color: accentColor,
-        letterSpacing: '0.8px',
+        color: textDark,
+        letterSpacing: '0.6px',
+      },
+      text: {
+        ...baseStyles.text,
+        fontSize: '10px',
+        lineHeight: '1.45',
       },
       entryDivider: {
         ...baseStyles.entryDivider,
-        margin: '6px 0 10px 0',
+        margin: '5px 0 8px 0',
         backgroundColor: `${accentColor}22`,
       },
       skillTag: {
         ...baseStyles.skillTag,
         color: textDark,
-        backgroundColor: '#f8fafc',
+        backgroundColor: 'transparent',
         border: `1px solid ${accentColor}22`,
         borderRadius: '6px',
+        padding: '3px 8px',
       },
     };
   }

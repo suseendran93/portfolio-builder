@@ -732,6 +732,12 @@
     }
   }
 
+  &__helper {
+    @apply text-xs;
+    margin-bottom: $space-6;
+    color: $color-text-secondary;
+  }
+
   &__actions {
     @apply flex gap-3;
   }

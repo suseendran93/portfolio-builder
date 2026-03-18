@@ -13,9 +13,21 @@ export const PORTFOLIO_THEME_OPTIONS = [
 ];
 
 export const RESUME_LAYOUT_OPTIONS = [
-  { id: "standard", name: "Standard", description: "Best for ATS compatibility" },
-  { id: "executive", name: "Executive", description: "Sharper hierarchy for senior profiles" },
-  { id: "minimal", name: "Minimal", description: "Lightweight structure with subdued decoration" }
+  {
+    id: "ats-classic",
+    name: "ATS Classic",
+    description: "Best for freshers and campus applications with a straightforward one-column structure"
+  },
+  {
+    id: "ats-structured",
+    name: "ATS Structured",
+    description: "Clear hierarchy for internships and early-career roles with slightly stronger section separation"
+  },
+  {
+    id: "ats-compact",
+    name: "ATS Compact",
+    description: "Tighter spacing for content-heavy one-page resumes without decorative distractions"
+  }
 ];
 
 export const DEFAULT_PORTFOLIO_CUSTOMIZATION = Object.freeze({
@@ -25,7 +37,7 @@ export const DEFAULT_PORTFOLIO_CUSTOMIZATION = Object.freeze({
 });
 
 export const DEFAULT_RESUME_CUSTOMIZATION = Object.freeze({
-  layout: "standard",
+  layout: "ats-classic",
   accentColor: "#1e293b"
 });
 
@@ -59,6 +71,21 @@ export const normalizeHexColor = (value, fallback) =>
 const normalizeOption = (value, allowedValues, fallback) =>
   allowedValues.includes(value) ? value : fallback;
 
+const normalizeResumeLayout = (value) => {
+  const legacyLayoutMap = {
+    standard: "ats-classic",
+    executive: "ats-structured",
+    minimal: "ats-compact"
+  };
+  const normalizedValue = legacyLayoutMap[value] || value;
+
+  return normalizeOption(
+    normalizedValue,
+    RESUME_LAYOUT_OPTIONS.map((option) => option.id),
+    DEFAULT_RESUME_CUSTOMIZATION.layout
+  );
+};
+
 export const normalizeCustomization = (customization = {}) => {
   const portfolio = customization?.portfolio || {};
   const resume = customization?.resume || {};
@@ -81,11 +108,7 @@ export const normalizeCustomization = (customization = {}) => {
       )
     },
     resume: {
-      layout: normalizeOption(
-        resume.layout,
-        RESUME_LAYOUT_OPTIONS.map((option) => option.id),
-        DEFAULT_RESUME_CUSTOMIZATION.layout
-      ),
+      layout: normalizeResumeLayout(resume.layout),
       accentColor: normalizeHexColor(
         resume.accentColor,
         DEFAULT_RESUME_CUSTOMIZATION.accentColor

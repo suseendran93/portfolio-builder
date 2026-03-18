@@ -1,0 +1,27 @@
+@use "../../styles/tokens" as *;
+
+.trust-links {
+  @apply flex flex-wrap items-center gap-4 text-sm;
+
+  &__link {
+    color: inherit;
+    opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+      color: $color-brand-primary;
+    }
+  }
+
+  &--default {
+    color: $color-text-secondary;
+  }
+
+  &--inverse {
+    color: rgba(248, 250, 252, 0.88);
+
+    .trust-links__link:hover {
+      color: $color-white;
+    }
+  }
+}

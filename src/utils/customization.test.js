@@ -76,6 +76,32 @@ describe("customization normalization", () => {
       }
     });
   });
+
+  it("maps legacy resume layout ids to ats-friendly templates", () => {
+    expect(
+      normalizeCustomization({
+        resume: {
+          layout: "standard"
+        }
+      }).resume.layout
+    ).toBe("ats-classic");
+
+    expect(
+      normalizeCustomization({
+        resume: {
+          layout: "executive"
+        }
+      }).resume.layout
+    ).toBe("ats-structured");
+
+    expect(
+      normalizeCustomization({
+        resume: {
+          layout: "minimal"
+        }
+      }).resume.layout
+    ).toBe("ats-compact");
+  });
 });
 
 describe("contact normalization", () => {
@@ -97,13 +123,13 @@ describe("contact normalization", () => {
 });
 
 describe("resume layout styling", () => {
-  it("returns different style treatments for executive and minimal layouts", () => {
-    const executiveStyles = getResumeStyles("#0f172a", "executive");
-    const minimalStyles = getResumeStyles("#0f172a", "minimal");
+  it("returns different style treatments for ats-structured and ats-compact layouts", () => {
+    const structuredStyles = getResumeStyles("#0f172a", "ats-structured");
+    const compactStyles = getResumeStyles("#0f172a", "ats-compact");
 
-    expect(executiveStyles.page.borderTop).toBe("14px solid #0f172a");
-    expect(executiveStyles.dateBadge.backgroundColor).toBe("#0f172a");
-    expect(minimalStyles.entry.borderLeft).toBe("none");
-    expect(minimalStyles.dateBadge.backgroundColor).toBe("transparent");
+    expect(structuredStyles.page.borderTop).toBe("10px solid #0f172a");
+    expect(structuredStyles.dateBadge.backgroundColor).toBe("#0f172a14");
+    expect(compactStyles.entry.borderLeft).toBe("none");
+    expect(compactStyles.dateBadge.backgroundColor).toBe("transparent");
   });
 });

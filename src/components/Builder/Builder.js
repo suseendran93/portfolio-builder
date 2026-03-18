@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette, FaArrowRight, FaRocket } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaBriefcase, FaCode, FaEnvelope, FaImage, FaTrash, FaPlus, FaCheck, FaEye, FaSignOutAlt, FaMagic, FaCopy, FaTimes, FaCrown, FaPalette, FaArrowRight, FaRocket, FaExternalLinkAlt } from 'react-icons/fa';
 import Customizer from './Customizer';
 import { savePortfolioForUser } from '../../utils/portfolioStorage';
 import { createDefaultPortfolioData, normalizePortfolioData } from '../../utils/customization';
@@ -885,6 +885,10 @@ const Builder = () => {
                                 </a>
                             </div>
 
+                            <p className="builder-modal__helper">
+                                Recruiters can open this link directly to view your public profile on desktop or mobile.
+                            </p>
+
                             <div className="builder-modal__actions">
                                 <button
                                     onClick={() => setShowModal(false)}
@@ -892,6 +896,14 @@ const Builder = () => {
                                 >
                                     Close
                                 </button>
+                                <a
+                                    href={generatedUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="builder-modal__button builder-modal__button--secondary"
+                                >
+                                    <FaExternalLinkAlt /> Open Link
+                                </a>
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(generatedUrl);

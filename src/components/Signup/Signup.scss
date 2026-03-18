@@ -88,6 +88,14 @@
     @apply text-sm text-slate-600;
   }
 
+  &__trust-copy {
+    @apply mt-4 text-xs leading-relaxed text-slate-500;
+  }
+
+  &__trust-links {
+    @apply mt-3 justify-center;
+  }
+
   &__link {
     @apply font-medium text-indigo-600 transition-colors;
 

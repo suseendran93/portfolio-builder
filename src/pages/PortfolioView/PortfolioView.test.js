@@ -5,6 +5,7 @@ import { PortfolioContext } from "../../context/PortfolioContext";
 import PortfolioView from "./PortfolioView";
 
 const mockUseAuth = jest.fn();
+const mockResumeDownload = jest.fn();
 
 jest.mock("../../context/AuthContext", () => ({
   useAuth: () => mockUseAuth()
@@ -20,9 +21,10 @@ jest.mock("../../context/PortfolioContext", () => {
   };
 });
 
-jest.mock("../../components/ResumeDownload/ResumeDownload", () => () => (
-  <button type="button">Download Resume</button>
-));
+jest.mock("../../components/ResumeDownload/ResumeDownload", () => (props) => {
+  mockResumeDownload(props);
+  return <button type="button">Download Resume</button>;
+});
 
 const portfolioData = {
   name: "Test User",
@@ -63,7 +65,7 @@ const portfolioData = {
       accentColor: "#4f46e5"
     },
     resume: {
-      layout: "minimal",
+      layout: "ats-compact",
       accentColor: "#1e293b"
     }
   }
@@ -88,6 +90,7 @@ describe("PortfolioView integration", () => {
   let consoleWarnSpy;
 
   beforeEach(() => {
+    mockResumeDownload.mockReset();
     mockUseAuth.mockReturnValue({
       userData: { tier: "PREMIUM" },
       logout: jest.fn()
@@ -121,5 +124,13 @@ describe("PortfolioView integration", () => {
     expect(screen.getByText("Download Resume")).toBeInTheDocument();
     expect(screen.getByText(/Copyright: Test User/i)).toBeInTheDocument();
     expect(container.firstChild).toHaveClass("portfolio-view--layout-creative");
+    expect(mockResumeDownload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        publicMode: false,
+        viewerTier: "PREMIUM",
+        showWatermark: false,
+        variant: "secondary"
+      })
+    );
   });
 });

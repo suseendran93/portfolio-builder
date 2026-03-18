@@ -28,7 +28,19 @@
   }
 
   &__footer {
-    @apply bg-white border-t border-slate-200 py-6 text-center text-slate-500 text-sm;
+    @apply bg-white border-t border-slate-200 py-6 text-sm;
+  }
+
+  &__footer-copy {
+    @apply text-center text-slate-500;
+  }
+
+  &__footer-note {
+    @apply mt-2 text-xs leading-relaxed;
+  }
+
+  &__footer-links {
+    @apply mt-4 justify-center;
   }
 }
 
@@ -53,6 +65,10 @@
   }
 
   .portfolio-view__footer {
-    @apply bg-transparent border-t-white/10 text-slate-300;
+    @apply bg-transparent border-t-white/10;
+  }
+
+  .portfolio-view__footer-copy {
+    @apply text-slate-300;
   }
 }

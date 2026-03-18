@@ -4,6 +4,8 @@ import { PortfolioContext } from '../../context/PortfolioContext';
 import PortfolioView from '../PortfolioView/PortfolioView';
 import { loadPublicPortfolioBySlug } from '../../utils/portfolioStorage';
 import { normalizePortfolioData } from '../../utils/customization';
+import { buildPublicPortfolioUrl } from '../../utils/router';
+import { applyPublicPageMetadata, resetDefaultMetadata } from '../../utils/metadata';
 import './PublicPortfolioView.scss';
 
 const PublicPortfolioView = () => {
@@ -44,6 +46,30 @@ const PublicPortfolioView = () => {
 
         fetchPortfolio();
     }, [slug]);
+
+    useEffect(() => {
+        if (!portfolioData) {
+            return undefined;
+        }
+
+        const title = `${portfolioData.name || "BuildFolio"}${portfolioData.title ? ` | ${portfolioData.title}` : ""}`;
+        const description = portfolioData.about
+            ? portfolioData.about.slice(0, 160)
+            : `${portfolioData.name || "BuildFolio"}'s public portfolio`;
+        const image = portfolioData.profilePic || `${window.location.origin}${process.env.PUBLIC_URL || ""}/logo.png`;
+        const url = buildPublicPortfolioUrl(slug);
+
+        applyPublicPageMetadata({
+            title,
+            description,
+            image,
+            url
+        });
+
+        return () => {
+            resetDefaultMetadata();
+        };
+    }, [portfolioData, slug]);
 
     if (loading) {
         return (

@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { DEFAULT_PORTFOLIO_CUSTOMIZATION, normalizeCustomization } from '../../utils/customization';
+import TrustLinks from '../../components/TrustLinks/TrustLinks';
 import './PortfolioView.scss';
 
 const PortfolioView = ({ publicMode = false }) => {
@@ -39,6 +40,7 @@ const PortfolioView = ({ publicMode = false }) => {
 
     const customization = normalizeCustomization(portfolioData.customization).portfolio || DEFAULT_PORTFOLIO_CUSTOMIZATION;
     const { layout, theme } = customization;
+    const trustLinkTone = layout === 'creative' ? 'inverse' : 'default';
 
     const getThemeClasses = () => {
         switch (theme) {
@@ -87,7 +89,9 @@ const PortfolioView = ({ publicMode = false }) => {
                     downloadResumeButton={
                         <ResumeDownload
                             variant="secondary"
-                            showWatermark={!publicMode && userData?.tier === 'BASIC'}
+                            showWatermark={!publicMode && userData?.tier !== 'PREMIUM'}
+                            publicMode={publicMode}
+                            viewerTier={userData?.tier}
                         />
                     }
                 />
@@ -107,9 +111,15 @@ const PortfolioView = ({ publicMode = false }) => {
             </div>
 
             <footer className="portfolio-view__footer">
-                <div>
-                    &copy; {new Date().getFullYear()} Copyright: {portfolioData?.name || "BuildFolio"}
+                <div className="portfolio-view__footer-copy">
+                    <div>
+                        &copy; {new Date().getFullYear()} Copyright: {portfolioData?.name || "BuildFolio"}
+                    </div>
+                    <div className="portfolio-view__footer-note">
+                        Built with a private draft workflow and a separate public share link.
+                    </div>
                 </div>
+                <TrustLinks tone={trustLinkTone} className="portfolio-view__footer-links" />
             </footer>
 
             <BackToTop />

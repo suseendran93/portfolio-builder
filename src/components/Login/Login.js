@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { FaLock, FaUser } from 'react-icons/fa';
+import TrustLinks from '../TrustLinks/TrustLinks';
 import './Login.scss';
 
 const Login = () => {
@@ -100,6 +101,10 @@ const Login = () => {
                                 Sign up
                             </Link>
                         </p>
+                        <p className="login__trust-copy">
+                            Your builder stays private until you publish a public portfolio link.
+                        </p>
+                        <TrustLinks className="login__trust-links" />
                     </div>
                 </div>
             </div>

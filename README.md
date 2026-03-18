@@ -16,10 +16,12 @@ BuildFolio is a React app for creating a personal portfolio site and downloadabl
   - Themes: `light`, `dark`, `royal`
   - Accent color
 - Resume styling controls:
-  - Layouts: `standard`, `executive`, `minimal`
+  - ATS-friendly templates: `ats-classic`, `ats-structured`, `ats-compact`
   - Accent color
 - Logged-in preview flow
 - Public portfolio publishing via slug-based URL
+- Published public pages now update title, description, canonical URL, and social tags
+- Lightweight trust layer with privacy and help pages
 - PDF resume export with `html2pdf.js`
 
 ## Tech Stack
@@ -68,6 +70,8 @@ The app now uses browser-style routes with GitHub Pages SPA fallback handling.
 - `/signup` -> signup
 - `/builder` -> private builder
 - `/preview` -> private preview
+- `/privacy` -> privacy overview
+- `/help` -> quick help and FAQ
 - `/p/:slug` -> public portfolio
 - `/success` -> payment success screen
 - `/cancel` -> payment cancelled screen
@@ -109,7 +113,7 @@ Typical portfolio document shape:
       "accentColor": "#4f46e5"
     },
     "resume": {
-      "layout": "standard",
+      "layout": "ats-classic",
       "accentColor": "#1e293b"
     }
   },
@@ -227,6 +231,47 @@ Hardening already added:
 - Unknown routes show a real 404 page
 - Uploaded profile images are resized/compressed before save
 - Styling options are normalized so unsupported saved combinations do not break rendering
+- Public portfolio pages update title, description, canonical URL, and social metadata on load
+- Login, signup, and portfolio views now expose privacy/help links and explain the private-draft-to-public-link flow
+- Resume templates are now labeled as ATS-friendly options, and legacy saved layouts are migrated automatically
+
+## Resume Templates
+
+Current resume templates are:
+
+- `ATS Classic`: best default for freshers and campus applications
+- `ATS Structured`: stronger hierarchy for internships and early-career roles
+- `ATS Compact`: tighter spacing for content-heavy one-page resumes
+
+Compatibility note:
+
+- Older saved resume layouts (`standard`, `executive`, `minimal`) are automatically mapped to the new ATS-friendly template ids
+
+## Publishing Polish
+
+Current publish/share polish includes:
+
+- Clean public URLs in the format `https://<host>/p/<slug>`
+- A publish success modal with direct open/copy actions
+- Dynamic page metadata updates for public portfolio pages
+
+Important caveat:
+
+- This is still a static SPA on GitHub Pages, so some social crawlers may not fully honor client-rendered metadata
+- For the strongest cross-platform unfurl previews, prerendering or server-side metadata would still be better
+
+## Trust Layer
+
+Current trust-oriented UX includes:
+
+- A dedicated `/privacy` page explaining what stays private, what becomes public, and what is stored
+- A dedicated `/help` page with publishing guidance and a lightweight FAQ
+- Trust links surfaced from login, signup, and portfolio footer UI
+
+Still remaining before a full public launch:
+
+- Replace the placeholder help page with a real support channel
+- Review privacy and legal copy formally before treating it as final policy text
 
 ## Known Limitations
 
@@ -234,12 +279,14 @@ Hardening already added:
 - Profile images are still stored in Firestore instead of object storage
 - No end-to-end test coverage yet
 - README assumes GitHub Pages deployment; Firebase Hosting is not configured in this repo
+- Trust copy is product guidance, not finalized legal policy text yet
 
 ## Recommended Next Steps
 
 - Replace the fake premium flow with real Stripe checkout plus webhook-backed entitlement updates
 - Move profile images from Firestore to Firebase Storage
 - Add end-to-end coverage for signup, publish, preview, and resume download
+- Add a real support contact path and finalize privacy/legal copy
 - Add a production `.env` and deployment checklist outside the repo
 
 ## Scripts

@@ -64,7 +64,7 @@ export const STARTER_TEMPLATES = [
     accentColor: "#4f46e5",
     portfolioTheme: "light",
     portfolioLayout: "modern",
-    resumeLayout: "standard",
+    resumeLayout: "ats-classic",
     data: {
       name: "Aarav Mehta",
       title: "Aspiring Software Engineer",
@@ -114,7 +114,7 @@ export const STARTER_TEMPLATES = [
     accentColor: "#0f766e",
     portfolioTheme: "light",
     portfolioLayout: "classic",
-    resumeLayout: "executive",
+    resumeLayout: "ats-structured",
     data: {
       name: "Riya Nair",
       title: "Entry-Level Data Analyst",
@@ -164,7 +164,7 @@ export const STARTER_TEMPLATES = [
     accentColor: "#db2777",
     portfolioTheme: "dark",
     portfolioLayout: "creative",
-    resumeLayout: "minimal",
+    resumeLayout: "ats-compact",
     data: {
       name: "Neha Kapoor",
       title: "Junior Product Designer",

@@ -1,0 +1,106 @@
+@use "../../styles/tokens" as *;
+
+.trust-page {
+  min-height: $size-full-viewport;
+  background:
+    linear-gradient(180deg, rgba(79, 70, 229, 0.06), rgba(248, 250, 252, 0) 18%),
+    $color-page-background;
+  color: $color-text-primary;
+
+  &__shell {
+    @apply w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  &__back {
+    @apply inline-flex items-center gap-2 rounded-xl text-sm font-semibold;
+    padding: $space-2 $space-4;
+    color: $color-text-secondary;
+    background-color: rgba(255, 255, 255, 0.76);
+    border: 1px solid $color-border-soft;
+
+    &:hover {
+      color: $color-text-primary;
+      background-color: $color-surface;
+    }
+  }
+
+  &__hero {
+    margin-top: $space-8;
+  }
+
+  &__badge {
+    @apply inline-flex w-fit items-center rounded-full text-xs font-bold uppercase tracking-widest;
+    padding: $space-2 $space-3;
+    color: $color-brand-primary;
+    background-color: $color-brand-highlight;
+  }
+
+  &__title {
+    @apply text-4xl font-bold;
+    max-width: 18ch;
+    margin-top: $space-5;
+  }
+
+  &__subtitle {
+    @apply text-base;
+    max-width: 42rem;
+    margin-top: $space-4;
+    color: $color-text-secondary;
+  }
+
+  &__grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-5;
+    margin-top: $space-8;
+  }
+
+  &__card,
+  &__panel {
+    border: 1px solid $color-border-soft;
+    border-radius: $radius-xl;
+    background-color: rgba(255, 255, 255, 0.92);
+    box-shadow: $shadow-floating;
+  }
+
+  &__card {
+    padding: $space-6;
+  }
+
+  &__icon {
+    @apply inline-flex items-center justify-center rounded-2xl;
+    width: $space-12;
+    height: $space-12;
+    color: $color-text-inverse;
+    background: linear-gradient(135deg, $color-brand-primary 0%, $color-brand-secondary 100%);
+  }
+
+  &__card-title {
+    @apply text-lg font-bold;
+    margin-top: $space-5;
+  }
+
+  &__card-text {
+    @apply text-sm leading-relaxed;
+    margin-top: $space-3;
+    color: $color-text-secondary;
+  }
+
+  &__panel {
+    margin-top: $space-8;
+    padding: $space-6;
+  }
+
+  &__panel-title {
+    @apply text-xl font-bold;
+  }
+
+  &__list {
+    @apply mt-4 flex flex-col gap-3 text-sm;
+    color: $color-text-secondary;
+    padding-left: $space-5;
+    list-style: disc;
+  }
+
+  &__footer {
+    @apply mt-8 flex justify-end;
+  }
+}

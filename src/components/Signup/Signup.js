@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaLock, FaEnvelope } from 'react-icons/fa';
+import TrustLinks from '../TrustLinks/TrustLinks';
 import './Signup.scss';
 
 const Signup = () => {
@@ -122,6 +123,10 @@ const Signup = () => {
                                 Log In
                             </Link>
                         </p>
+                        <p className="signup__trust-copy">
+                            Draft privately, refine your content, then publish only when you are ready to share.
+                        </p>
+                        <TrustLinks className="signup__trust-links" />
                     </div>
                 </div>
             </div>

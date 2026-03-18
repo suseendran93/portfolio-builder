@@ -25,6 +25,8 @@ jest.mock("../pages/PublicPortfolioView/PublicPortfolioView", () => () => <div>P
 jest.mock("../pages/Success/Success", () => () => <div>Payment Success</div>);
 jest.mock("../pages/Cancel/Cancel", () => () => <div>Payment Cancelled</div>);
 jest.mock("../pages/NotFound/NotFound", () => () => <div>Not Found</div>);
+jest.mock("../pages/Privacy/Privacy", () => () => <div>Privacy Screen</div>);
+jest.mock("../pages/Help/Help", () => () => <div>Help Screen</div>);
 
 const renderAppAtRoute = (route = "/") =>
   render(
@@ -79,6 +81,22 @@ describe("App routing", () => {
     renderAppAtRoute("/p/test-slug");
 
     expect(screen.getByText("Public Portfolio")).toBeInTheDocument();
+  });
+
+  it("renders the privacy route", () => {
+    mockUseAuth.mockReturnValue({ currentUser: null });
+
+    renderAppAtRoute("/privacy");
+
+    expect(screen.getByText("Privacy Screen")).toBeInTheDocument();
+  });
+
+  it("renders the help route", () => {
+    mockUseAuth.mockReturnValue({ currentUser: null });
+
+    renderAppAtRoute("/help");
+
+    expect(screen.getByText("Help Screen")).toBeInTheDocument();
   });
 
   it("renders not found for unknown routes", () => {

@@ -7,10 +7,19 @@ import { DEFAULT_RESUME_CUSTOMIZATION, normalizeCustomization } from '../../util
 import { getResumeStyles } from '../../utils/resumeStyles';
 import './ResumeDownload.scss';
 
-const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = false }) => {
+const ResumeDownload = ({
+    className = '',
+    variant = 'primary',
+    showWatermark = false,
+    publicMode = false,
+    viewerTier = null,
+}) => {
     const { portfolioData } = useContext(PortfolioContext);
     const resumeRef = useRef(null);
     const [downloading, setDownloading] = useState(false);
+    const normalizedTier = typeof viewerTier === 'string' ? viewerTier.toUpperCase() : '';
+    const shouldShowWatermark = Boolean(showWatermark && !publicMode && normalizedTier !== 'PREMIUM');
+    const watermarkOffsets = Array.from({ length: 14 }, (_, index) => 120 + index * 220);
 
     const handleDownload = async () => {
         if (!resumeRef.current) return;
@@ -34,8 +43,8 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            // Use the worker API explicitly for better control
             await html2pdf().from(resumeRef.current).set(opt).save();
+
             toast.success('Resume downloaded!', { id: toastId });
         } catch (error) {
             console.error('PDF generation error:', error);
@@ -47,15 +56,6 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
 
     const resumeCustom = normalizeCustomization(portfolioData.customization).resume || DEFAULT_RESUME_CUSTOMIZATION;
     const { accentColor: resumeAccent, layout: resumeLayout } = resumeCustom;
-
-    // Watermark SVG Pattern
-    const watermarkSvg = `
-        <svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'>
-            <text x='50%' y='50%' font-size='60' font-weight='bold' fill='rgba(0,0,0,0.03)' 
-            transform='rotate(-45, 200, 200)' text-anchor='middle' font-family='Arial'>DRAFT</text>
-        </svg>
-    `;
-    const watermarkUrl = `data:image/svg+xml;base64,${btoa(watermarkSvg)}`;
 
     const workEntries = portfolioData.work || [];
 
@@ -82,10 +82,42 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
                     style={{
                         ...pdfStyles.page,
                         position: 'relative',
-                        backgroundImage: showWatermark ? `url("${watermarkUrl}")` : 'none',
-                        backgroundRepeat: 'repeat'
+                        overflow: 'hidden',
                     }}
                 >
+                    {shouldShowWatermark && (
+                        <div
+                            aria-hidden="true"
+                            style={{
+                                position: 'absolute',
+                                inset: '0',
+                                zIndex: 0,
+                                pointerEvents: 'none',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {watermarkOffsets.map((offset, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        position: 'absolute',
+                                        top: `${offset}px`,
+                                        left: '50%',
+                                        transform: 'translateX(-50%) rotate(-32deg)',
+                                        fontSize: '60px',
+                                        fontWeight: '700',
+                                        letterSpacing: '0.4rem',
+                                        color: 'rgba(148, 163, 184, 0.18)',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    DRAFT
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div style={{ position: 'relative', zIndex: 1 }}>
 
                     {/* ─── Header ─── */}
                     <table style={pdfStyles.headerTable}>
@@ -226,6 +258,7 @@ const ResumeDownload = ({ className = '', variant = 'primary', showWatermark = f
                             </div>
                         </div>
                     )}
+                    </div>
                 </div>
             </div>
         </>
